@@ -1,0 +1,72 @@
+<component>
+	<api>
+		<prop name="recommended_title" type="string" />
+		<prop name="recommended_value" type="string" />
+		<prop name="apply_text" type="string" />
+	</api>
+
+	<view
+		width="452"
+		height="58"
+		scrollable="false"
+		scrollbar_mode="off"
+		style_bg_color="#COLOR_WATER_TEMP_BG"
+		style_bg_opa="120"
+		style_radius="16"
+		style_pad_all="0"
+		style_border_width="1"
+		style_border_color="#COLOR_STATUS_INFO"
+		style_shadow_width="0"
+	>
+		<lv_label
+			name="irrigation_pump_cycle_recommended_title_label"
+			x="18"
+			y="10"
+			width="280"
+			text="$recommended_title"
+			long_mode="clip"
+			style_text_color="#COLOR_STATUS_INFO"
+			style_text_font="font_inter_10"
+			style_text_letter_space="1"
+		/>
+
+		<lv_label
+			name="irrigation_pump_cycle_recommended_value_label"
+			x="18"
+			y="31"
+			width="300"
+			text="$recommended_value"
+			long_mode="clip"
+			style_text_color="#COLOR_TEXT_PRIMARY"
+			style_text_font="font_inter_14"
+		/>
+
+		<lv_button
+			name="irrigation_pump_cycle_recommended_apply_btn"
+			x="362"
+			y="12"
+			width="68"
+			height="34"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_STATUS_INFO"
+			style_bg_opa="255"
+			style_radius="10"
+			style_border_width="0"
+			style_pad_all="0"
+			style_shadow_width="0"
+		>
+			<lv_label
+				name="irrigation_pump_cycle_recommended_apply_label"
+				x="0"
+				y="8"
+				width="68"
+				text="$apply_text"
+				long_mode="clip"
+				style_text_align="center"
+				style_text_color="#COLOR_WHITE"
+				style_text_font="font_inter_12"
+			/>
+		</lv_button>
+	</view>
+</component>

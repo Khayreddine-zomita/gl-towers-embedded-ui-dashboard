@@ -12,7 +12,7 @@
 	>
 		<global_top_status_bar x="0" y="0" bar_title="GL TOWERS" bar_time="13:20" bar_wifi="WiFi" />
 
-		<irrigation_settings_window_card x="14" y="44" start_time_text="06:00" end_time_text="22:00" end_time="hhh" />
+		<irrigation_settings_window_card x="14" y="44" start_time_text="06:00" end_time_text="22:00" />
 
 		<irrigation_settings_night_break_card
 			x="14"
