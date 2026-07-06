@@ -1,0 +1,326 @@
+<component>
+	<view
+		width="452"
+		height="217"
+		scrollable="false"
+		scrollbar_mode="off"
+		style_bg_opa="0"
+		style_pad_all="0"
+		style_border_width="0"
+		style_radius="0"
+	>
+		<!-- Page title -->
+		<lv_label
+			name="irrigation_settings_growth_stage_title_label"
+			x="2"
+			y="0"
+			width="340"
+			text="Growth Stage"
+			long_mode="clip"
+			style_text_color="#COLOR_PRIMARY_GREEN"
+			style_text_font="font_inter_14"
+		/>
+
+		<!-- Main card -->
+		<lv_obj
+			name="irrigation_growth_stage_card"
+			x="0"
+			y="24"
+			width="452"
+			height="193"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_CARD_BG"
+			style_bg_opa="255"
+			style_radius="18"
+			style_pad_all="0"
+			style_border_width="1"
+			style_border_color="#COLOR_DIVIDER"
+			style_shadow_width="8"
+			style_shadow_opa="16"
+			style_shadow_color="#COLOR_SHADOW"
+			style_shadow_offset_y="3"
+		>
+			<!-- Germination selected -->
+			<lv_button
+				name="irrigation_growth_stage_germination_btn"
+				x="18"
+				y="10"
+				width="416"
+				height="38"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_LIGHT_GREEN"
+				style_bg_opa="90"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_PRIMARY_GREEN"
+				style_pad_all="0"
+				style_shadow_width="0"
+			>
+				<lv_image
+					name="irrigation_growth_stage_germination_icon"
+					x="16"
+					y="7"
+					width="24"
+					height="24"
+					src="img_irrigation_growth_stage_germination_color_16px"
+					scrollable="false"
+					scrollbar_mode="off"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_germination_name_label"
+					x="56"
+					y="5"
+					width="210"
+					text="Germination"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_PRIMARY"
+					style_text_font="font_inter_12"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_germination_desc_label"
+					x="56"
+					y="22"
+					width="290"
+					text="Seeds germinating, minimal water needed"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_SECONDARY"
+					style_text_font="font_inter_9"
+				/>
+
+				<lv_obj
+					name="irrigation_growth_stage_germination_selected_circle"
+					x="376"
+					y="8"
+					width="20"
+					height="20"
+					scrollable="false"
+					scrollbar_mode="off"
+					style_bg_color="#COLOR_PRIMARY_GREEN"
+					style_bg_opa="255"
+					style_radius="10"
+					style_border_width="0"
+					style_pad_all="0"
+				>
+					<lv_obj
+						name="irrigation_growth_stage_germination_selected_dot"
+						x="7"
+						y="7"
+						width="6"
+						height="6"
+						scrollable="false"
+						scrollbar_mode="off"
+						style_bg_color="#COLOR_WHITE"
+						style_bg_opa="255"
+						style_radius="3"
+						style_border_width="0"
+						style_pad_all="0"
+					/>
+				</lv_obj>
+			</lv_button>
+
+			<!-- Seedling -->
+			<lv_button
+				name="irrigation_growth_stage_seedling_btn"
+				x="18"
+				y="55"
+				width="416"
+				height="38"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_CARD_BG"
+				style_bg_opa="255"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+				style_shadow_width="0"
+			>
+				<lv_image
+					name="irrigation_growth_stage_seedling_icon"
+					x="16"
+					y="5"
+					width="24"
+					height="24"
+					src="img_irrigation_growth_stage_seedling_16px"
+					scrollable="false"
+					scrollbar_mode="off"
+					style_image_recolor="#COLOR_PRIMARY_GREEN"
+					style_image_recolor_opa="255"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_seedling_name_label"
+					x="56"
+					y="5"
+					width="210"
+					text="Seedling / Young"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_PRIMARY"
+					style_text_font="font_inter_12"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_seedling_desc_label"
+					x="56"
+					y="22"
+					width="290"
+					text="Young developing plants, gentle irrigation"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_SECONDARY"
+					style_text_font="font_inter_10"
+				/>
+
+				<lv_obj
+					name="irrigation_growth_stage_seedling_radio_circle"
+					x="376"
+					y="8"
+					width="20"
+					height="20"
+					scrollable="false"
+					scrollbar_mode="off"
+					style_bg_opa="0"
+					style_radius="10"
+					style_border_width="2"
+					style_border_color="#COLOR_DIVIDER"
+					style_pad_all="0"
+				/>
+			</lv_button>
+
+			<!-- Vegetative -->
+			<lv_button
+				name="irrigation_growth_stage_vegetative_btn"
+				x="18"
+				y="100"
+				width="416"
+				height="38"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_CARD_BG"
+				style_bg_opa="255"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+				style_shadow_width="0"
+			>
+				<lv_image
+					name="irrigation_growth_stage_vegetative_icon"
+					x="16"
+					y="7"
+					width="24"
+					height="24"
+					src="img_irrigation_growth_stage_vegetative_16px"
+					scrollable="false"
+					scrollbar_mode="off"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_vegetative_name_label"
+					x="56"
+					y="5"
+					width="210"
+					text="Vegetative"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_PRIMARY"
+					style_text_font="font_inter_12"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_vegetative_desc_label"
+					x="56"
+					y="22"
+					width="290"
+					text="Active leaf growth, regular irrigation"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_SECONDARY"
+					style_text_font="font_inter_9"
+				/>
+
+				<lv_obj
+					name="irrigation_growth_stage_vegetative_radio_circle"
+					x="376"
+					y="8"
+					width="20"
+					height="20"
+					scrollable="false"
+					scrollbar_mode="off"
+					style_bg_opa="0"
+					style_radius="10"
+					style_border_width="2"
+					style_border_color="#COLOR_DIVIDER"
+					style_pad_all="0"
+				/>
+			</lv_button>
+
+			<!-- Mature / production -->
+			<lv_button
+				name="irrigation_growth_stage_mature_btn"
+				x="18"
+				y="145"
+				width="416"
+				height="38"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_CARD_BG"
+				style_bg_opa="255"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+				style_shadow_width="0"
+			>
+				<lv_image
+					name="irrigation_growth_stage_mature_icon"
+					x="16"
+					y="3"
+					width="24"
+					height="24"
+					src="img_irrigation_growth_stage_mature_16px"
+					scrollable="false"
+					scrollbar_mode="off"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_mature_name_label"
+					x="56"
+					y="3"
+					width="210"
+					text="Mature / Production"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_PRIMARY"
+					style_text_font="font_inter_12"
+				/>
+
+				<lv_label
+					name="irrigation_growth_stage_mature_desc_label"
+					x="56"
+					y="19"
+					width="290"
+					text="Flowering or harvest, frequent irrigation"
+					long_mode="clip"
+					style_text_color="#COLOR_TEXT_SECONDARY"
+					style_text_font="font_inter_10"
+				/>
+
+				<lv_obj
+					name="irrigation_growth_stage_mature_radio_circle"
+					x="376"
+					y="8"
+					width="20"
+					height="20"
+					scrollable="false"
+					scrollbar_mode="off"
+					style_bg_opa="0"
+					style_radius="10"
+					style_border_width="2"
+					style_border_color="#COLOR_DIVIDER"
+					style_pad_all="0"
+				/>
+			</lv_button>
+		</lv_obj>
+	</view>
+</component>
