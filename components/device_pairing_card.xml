@@ -1,0 +1,207 @@
+<component>
+	<api>
+		<prop name="pairing_status" type="string" />
+		<prop name="pairing_code" type="string" />
+	</api>
+
+	<view
+		width="452"
+		height="217"
+		scrollable="false"
+		scrollbar_mode="off"
+		style_bg_opa="0"
+		style_pad_all="0"
+		style_border_width="0"
+		style_radius="0"
+	>
+		<lv_label
+			name="device_pairing_title_label"
+			x="2"
+			y="0"
+			width="260"
+			text="DEVICE PAIRING"
+			long_mode="clip"
+			style_text_color="#COLOR_PRIMARY_GREEN"
+			style_text_font="font_inter_14"
+			style_text_letter_space="1"
+		/>
+
+		<lv_obj
+			name="device_pairing_card"
+			x="0"
+			y="24"
+			width="452"
+			height="193"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_CARD_BG"
+			style_bg_opa="255"
+			style_radius="18"
+			style_pad_all="0"
+			style_border_width="1"
+			style_border_color="#COLOR_DIVIDER"
+			style_shadow_width="8"
+			style_shadow_opa="16"
+			style_shadow_color="#COLOR_SHADOW"
+			style_shadow_offset_y="3"
+		>
+			<lv_label
+				name="device_pairing_status_title_label"
+				x="18"
+				y="14"
+				width="150"
+				text="Pairing status"
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_PRIMARY"
+				style_text_font="font_inter_12"
+			/>
+
+			<lv_label
+				name="device_pairing_status_value_label"
+				x="250"
+				y="14"
+				width="150"
+				text="$pairing_status"
+				long_mode="clip"
+				style_text_align="right"
+				style_text_color="#COLOR_STATUS_WARNING"
+				style_text_font="font_inter_12"
+			/>
+
+			<lv_obj
+				name="device_pairing_divider_1"
+				x="18"
+				y="40"
+				width="416"
+				height="1"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_DIVIDER"
+				style_bg_opa="255"
+				style_border_width="0"
+				style_pad_all="0"
+			/>
+
+			<!-- QR placeholder -->
+			<lv_obj
+				name="device_pairing_qr_box"
+				x="22"
+				y="58"
+				width="86"
+				height="86"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_SOFT_SURFACE"
+				style_bg_opa="255"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+			>
+				<lv_label
+					name="device_pairing_qr_label"
+					x="0"
+					y="32"
+					width="86"
+					text="QR"
+					long_mode="clip"
+					style_text_align="center"
+					style_text_color="#COLOR_TEXT_SECONDARY"
+					style_text_font="font_inter_15"
+				/>
+			</lv_obj>
+
+			<lv_label
+				name="device_pairing_code_title_label"
+				x="128"
+				y="56"
+				width="160"
+				text="Pairing code"
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_SECONDARY"
+				style_text_font="font_inter_10"
+				style_text_letter_space="1"
+			/>
+
+			<lv_label
+				name="device_pairing_code_value_label"
+				x="128"
+				y="76"
+				width="180"
+				text="$pairing_code"
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_PRIMARY"
+				style_text_font="font_inter_26"
+			/>
+
+			<lv_label
+				name="device_pairing_desc_label"
+				x="128"
+				y="112"
+				width="290"
+				text="Scan the QR code or enter this code in the mobile app or dashboard."
+				long_mode="wrap"
+				style_text_color="#COLOR_TEXT_SECONDARY"
+				style_text_font="font_inter_10"
+			/>
+
+			<lv_button
+				name="device_pairing_start_btn"
+				x="128"
+				y="150"
+				width="138"
+				height="28"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_LIGHT_GREEN"
+				style_bg_opa="180"
+				style_radius="10"
+				style_border_width="1"
+				style_border_color="#COLOR_PRIMARY_GREEN"
+				style_pad_all="0"
+				style_shadow_width="0"
+			>
+				<lv_label
+					name="device_pairing_start_label"
+					x="0"
+					y="7"
+					width="138"
+					text="Start pairing"
+					long_mode="clip"
+					style_text_align="center"
+					style_text_color="#COLOR_PRIMARY_GREEN"
+					style_text_font="font_inter_11"
+				/>
+			</lv_button>
+
+			<lv_button
+				name="device_pairing_refresh_btn"
+				x="282"
+				y="150"
+				width="136"
+				height="28"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_CARD_BG"
+				style_bg_opa="255"
+				style_radius="10"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+				style_shadow_width="0"
+			>
+				<lv_label
+					name="device_pairing_refresh_label"
+					x="0"
+					y="7"
+					width="136"
+					text="Refresh code"
+					long_mode="clip"
+					style_text_align="center"
+					style_text_color="#COLOR_TEXT_PRIMARY"
+					style_text_font="font_inter_11"
+				/>
+			</lv_button>
+		</lv_obj>
+	</view>
+</component>

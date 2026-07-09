@@ -1,0 +1,26 @@
+<screen name="screen_settings_device">
+	<view
+		width="480"
+		height="320"
+		scrollable="false"
+		scrollbar_mode="off"
+		style_bg_color="#COLOR_APP_BG"
+		style_bg_opa="255"
+		style_pad_all="0"
+		style_border_width="0"
+		style_radius="0"
+	>
+		<global_top_status_bar x="0" y="0" bar_title="GL TOWERS" bar_time="13:20" bar_wifi="WiFi" />
+
+		<settings_device_card
+			x="14"
+			y="42"
+			device_name="GL Tower"
+			model_name="Advanced"
+			serial_number="GLT-A1-0001"
+			firmware_version="v0.1.0"
+		/>
+
+		<settings_device_bottom_actions x="14" y="275" back_text="Back" save_text="Save Device" />
+	</view>
+</screen>
