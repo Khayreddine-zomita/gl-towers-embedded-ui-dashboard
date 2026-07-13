@@ -1,0 +1,211 @@
+<component>
+	<api>
+		<prop name="reset_status" type="string" />
+	</api>
+
+	<view
+		width="452"
+		height="217"
+		scrollable="false"
+		scrollbar_mode="off"
+		style_bg_opa="0"
+		style_pad_all="0"
+		style_border_width="0"
+		style_radius="0"
+	>
+		<lv_label
+			name="settings_factory_reset_title_label"
+			x="2"
+			y="0"
+			width="260"
+			text="FACTORY RESET"
+			long_mode="clip"
+			style_text_color="#COLOR_ALERT_RED"
+			style_text_font="font_inter_14"
+			style_text_letter_space="1"
+		/>
+
+		<lv_label
+			name="settings_factory_reset_subtitle_label"
+			x="250"
+			y="2"
+			width="198"
+			text="$reset_status"
+			long_mode="clip"
+			style_text_align="right"
+			style_text_color="#COLOR_TEXT_SECONDARY"
+			style_text_font="font_inter_11"
+		/>
+
+		<!-- Warning card -->
+		<lv_obj
+			name="settings_factory_reset_warning_card"
+			x="0"
+			y="24"
+			width="452"
+			height="58"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_WARNING_BG"
+			style_bg_opa="255"
+			style_radius="16"
+			style_pad_all="0"
+			style_border_width="1"
+			style_border_color="#COLOR_ALERT_ORANGE"
+		>
+			<lv_label
+				name="settings_factory_reset_warning_title_label"
+				x="16"
+				y="9"
+				width="420"
+				text="This action can erase device settings."
+				long_mode="clip"
+				style_text_color="#COLOR_ALERT_ORANGE"
+				style_text_font="font_inter_12"
+			/>
+
+			<lv_label
+				name="settings_factory_reset_warning_text_label"
+				x="16"
+				y="30"
+				width="420"
+				text="Only continue if you want to reset this tower configuration."
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_SECONDARY"
+				style_text_font="font_inter_10"
+			/>
+		</lv_obj>
+
+		<!-- Reset scope card -->
+		<lv_obj
+			name="settings_factory_reset_options_card"
+			x="0"
+			y="92"
+			width="452"
+			height="77"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_CARD_BG"
+			style_bg_opa="255"
+			style_radius="16"
+			style_pad_all="0"
+			style_border_width="1"
+			style_border_color="#COLOR_DIVIDER"
+			style_shadow_width="8"
+			style_shadow_opa="14"
+			style_shadow_color="#COLOR_SHADOW"
+			style_shadow_offset_y="3"
+		>
+			<lv_label
+				name="settings_factory_reset_scope_title_label"
+				x="18"
+				y="13"
+				width="160"
+				text="Reset scope"
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_PRIMARY"
+				style_text_font="font_inter_12"
+			/>
+
+			<lv_dropdown
+				name="settings_factory_reset_scope_dropdown"
+				x="242"
+				y="8"
+				width="172"
+				height="30"
+				options="App settings only&#10;Network settings&#10;Full factory reset"
+				selected="0"
+				symbol="img_simple_chevron_icon_1"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_DARK_FOREST"
+				style_bg_opa="255"
+				style_radius="10"
+				style_border_width="0"
+				style_pad_left="10"
+				style_pad_right="8"
+				style_text_color="#COLOR_WHITE"
+				style_text_font="font_inter_11"
+				style_image_recolor-indicator="#COLOR_WHITE"
+				style_image_recolor_opa-indicator="255"
+				style_transform_rotation-indicator="900"
+				style_transform_pivot_x-indicator="8"
+				style_transform_pivot_y-indicator="8"
+			>
+				<lv_dropdown-list
+					style_bg_color="#COLOR_CARD_BG"
+					style_bg_opa="255"
+					style_radius="10"
+					style_border_width="1"
+					style_border_color="#COLOR_DIVIDER"
+					style_text_color="#COLOR_TEXT_PRIMARY"
+					style_text_font="font_inter_11"
+					style_bg_color-selected="#COLOR_LIGHT_GREEN"
+					style_bg_opa-selected="255"
+					style_text_color-selected="#COLOR_PRIMARY_GREEN"
+				/>
+			</lv_dropdown>
+
+			<lv_obj
+				name="settings_factory_reset_divider_1"
+				x="18"
+				y="48"
+				width="416"
+				height="1"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_DIVIDER"
+				style_bg_opa="255"
+				style_border_width="0"
+				style_pad_all="0"
+			/>
+
+			<lv_checkbox
+				name="settings_factory_reset_confirm_checkbox"
+				x="18"
+				y="55"
+				width="400"
+				height="18"
+				text="I understand this reset action"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_text_color="#COLOR_TEXT_PRIMARY"
+				style_text_font="font_inter_11"
+				style_bg_color-indicator="#COLOR_CARD_BG"
+				style_bg_opa-indicator="255"
+				style_border_width-indicator="1"
+				style_border_color-indicator="#COLOR_DIVIDER"
+				style_radius-indicator="4"
+			/>
+		</lv_obj>
+
+		<!-- Helper note -->
+		<lv_obj
+			name="settings_factory_reset_note_card"
+			x="0"
+			y="180"
+			width="452"
+			height="37"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_SOFT_SURFACE"
+			style_bg_opa="255"
+			style_radius="14"
+			style_pad_all="0"
+			style_border_width="1"
+			style_border_color="#COLOR_DIVIDER"
+		>
+			<lv_label
+				name="settings_factory_reset_note_label"
+				x="16"
+				y="8"
+				width="420"
+				height="22"
+				text="Calibration values should only be erased with full factory reset."
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_SECONDARY"
+				style_text_font="font_inter_10"
+			/>
+		</lv_obj>
+	</view>
+</component>
