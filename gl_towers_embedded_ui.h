@@ -14,6 +14,12 @@ extern "C" {
  *********************/
 
 #include "gl_towers_embedded_ui_gen.h"
+#include "src/gl_towers_ui_contract.h"
+#include "src/state/gl_towers_state.h"
+#include "src/commands/gl_towers_commands.h"
+#include "src/utils/gl_towers_utils.h"
+#include "src/ui_binding/gl_towers_ui_binding.h"
+#include "src/gl_towers_mock_state.h"
 
 /*********************
  *      DEFINES
@@ -35,6 +41,16 @@ extern "C" {
  * Initialize the component library
  */
 void gl_towers_embedded_ui_init(const char * asset_path);
+
+/**
+ * Get the current UI state
+ */
+const gl_towers_ui_state_t* gl_towers_embedded_ui_get_state(void);
+
+/**
+ * Tick the UI (call periodically for telemetry updates, etc.
+ */
+void gl_towers_embedded_ui_tick(void);
 
 /**********************
  *      MACROS

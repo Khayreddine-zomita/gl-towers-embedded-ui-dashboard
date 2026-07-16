@@ -1,0 +1,756 @@
+GL Towers Dashboard
+# State Machine Specification
+**Version 1.0**
+## Table of Contents
+1. [Purpose and Scope](#1-purpose-and-scope)
+2. [Notation](#2-notation)
+3. [System-Level State Machine](#3-system-level-state-machine)
+4. [Startup and Initialization](#4-startup-and-initialization)
+5. [Telemetry State Machine](#5-telemetry-state-machine)
+6. [Sensor Validation State Machine](#6-sensor-validation-state-machine)
+7. [Health Evaluation State Machine](#7-health-evaluation-state-machine)
+8. [Alert Generation State Machine](#8-alert-generation-state-machine)
+9. [Recommendation Generation State Machine](#9-recommendation-generation-state-machine)
+10. [Dashboard Refresh State Machine](#10-dashboard-refresh-state-machine)
+11. [Screen Navigation State Machine](#11-screen-navigation-state-machine)
+12. [Touch Interaction State Machine](#12-touch-interaction-state-machine)
+13. [LED Configuration State Machine](#13-led-configuration-state-machine)
+14. [Irrigation Configuration State Machine](#14-irrigation-configuration-state-machine)
+15. [Communication Failure and Recovery State Machine](#15-communication-failure-and-recovery-
+state-machine)
+16. [Pump Manual Control State Machine](#16-pump-manual-control-state-machine)
+17. [Tank Adjustment State Machine](#17-tank-adjustment-state-machine)
+18. [Notification Center State Machine](#18-notification-center-state-machine)
+19. [Future Integration Points](#19-future-integration-points)
+20. [State Summary Tables](#20-state-summary-tables)
+---
+## 1. Purpose and Scope
+This document specifies the complete operational behavior of the GL Towers Dashboard as a set of
+formal state machines. Each state machine describes the states, events, transitions, conditions
+(guards), and outputs for one functional subsystem.
+The firmware implementation must reproduce the behavior described in every state machine exactly
+in order to achieve functional equivalence with the reference dashboard.
+This document is complementary to the Functional Logic Specification (Document 1). Where
+Document 1 describes *what* computations are performed, this document describes *when* those
+computations execute and what state transitions they produce.
+---
+## 2. Notation
+State diagrams use Mermaid stateDiagram-v2 syntax.
+| Symbol | Meaning |
+|---------------------|--------------------------------------------|
+| `[*]` | Entry point or terminal state |
+| `State --> State` | Unconditional transition |
+| `State --> State : event [guard] / output` | Transition with event, optional guard, optional output |
+| `state "Label" as X` | State alias |
+| Note annotations | Supplementary explanation |
+Guard conditions are written in square brackets. Outputs (actions) follow the slash. Multiple guards
+and outputs on the same transition are separated by newlines in the body text.
+---
+## 3. System-Level State Machine
+The top-level state machine describes the major operational phases of the dashboard system.
+```mermaid
+stateDiagram-v2
+[*] --> Startup
+Startup --> Initializing : power on / load stored state
+Initializing --> WaitingForTelemetry : initialization complete
+Initializing --> Initializing : stored state loading
+WaitingForTelemetry --> Operating : first telemetry snapshot received
+WaitingForTelemetry --> WaitingForTelemetry : tick / no snapshot yet
+Operating --> Operating : telemetry tick / applySnapshot
+Operating --> CommunicationWarning : lastUpdate age > 120,000 ms
+Operating --> Shutdown : power off event
+CommunicationWarning --> Operating : telemetry snapshot received
+CommunicationWarning --> CommunicationOffline : lastUpdate age > 240,000 ms
+CommunicationOffline --> CommunicationWarning : telemetry snapshot received
+CommunicationOffline --> CommunicationOffline : tick / maintain last values
+Shutdown --> [*]
+```
+**States:**
+| State | Description |
+|------------------------|---------------------------------------------------------------------|
+| Startup | System power-on. Hardware peripherals initializing. |
+| Initializing | Restoring persisted device state, plants, LED, irrigation, history. |
+| WaitingForTelemetry | First sensor snapshot not yet received. Dashboard shows "No Data". |
+| Operating | Normal operation. Telemetry being received and processed. |
+| CommunicationWarning | Telemetry delayed > 120 s. Warning indicator shown. |
+| CommunicationOffline | Telemetry absent > 240 s. Offline indicator shown. |
+| Shutdown | System power-off sequence. |
+---
+## 4. Startup and Initialization
+```mermaid
+stateDiagram-v2
+[*] --> HardwareBoot
+HardwareBoot --> LoadStoredDevices : hardware ready
+LoadStoredDevices --> LoadStoredNotifications : devices loaded
+LoadStoredNotifications --> LoadTelemetryHistory : notifications loaded
+LoadTelemetryHistory --> LoadProfileAndSettings : history loaded
+LoadProfileAndSettings --> SeedDefaultDevice : [no devices found] / create default device
+LoadProfileAndSettings --> SelectActiveDevice : [devices exist]
+SeedDefaultDevice --> SelectActiveDevice : default device created
+SelectActiveDevice --> StartTelemetryProvider : active device set
+StartTelemetryProvider --> RenderInitialScreen : provider started
+RenderInitialScreen --> [*] : initial Home screen rendered
+```
+**Initialization sequence in firmware:**
+1. **HardwareBoot** — Initialize display, peripherals, storage subsystem.
+2. **LoadStoredDevices** — Read persisted device array from storage (`gl_devices_v1`). Restore:
+device metadata, plant config, LED config, irrigation config, tank fill level.
+3. **LoadStoredNotifications** — Read notification log from storage (`gl_notifications_v1`).
+4. **LoadTelemetryHistory** — Read rolling sample arrays from storage (`gl_history_v1`).
+5. **LoadProfileAndSettings** — Read operator profile and app settings.
+6. **SeedDefaultDevice** — If no devices exist, create one default device with factory defaults. See
+Document 1, Section 2.3 for default values.
+7. **SelectActiveDevice** — Set `activeDeviceId` to the first device or the previously active device
+ID.
+8. **StartTelemetryProvider** — Begin telemetry provider. Deliver first snapshot immediately.
+9. **RenderInitialScreen** — Display Home screen. Sensor values show last persisted values or
+defaults.
+**Important:** Sensor values are **transient** and are **not persisted** between boots. After
+boot, sensor tiles will show the default initial values until the first telemetry snapshot is received
+from the hardware. The firmware must deliver a snapshot as soon as sensor readings are available.
+---
+## 5. Telemetry State Machine
+```mermaid
+stateDiagram-v2
+[*] --> Idle
+Idle --> Sampling : telemetry tick fires (interval: 5,000 / 15,000 / 30,000 ms)
+Sampling --> ApplySnapshot : sensor values read
+Sampling --> SnapshotFailed : sensor read error
+ApplySnapshot --> UpdateLastTimestamp : merge into sensors object / lastUpdate = now
+UpdateLastTimestamp --> SyncConnectionMetadata : compute connectionStatus from age
+SyncConnectionMetadata --> RecordHistorySample : [age since last sample > 10,000 ms]
+SyncConnectionMetadata --> SkipHistorySample : [age since last sample ≤ 10,000 ms]
+RecordHistorySample --> TriggerScreenRefresh
+SkipHistorySample --> TriggerScreenRefresh
+TriggerScreenRefresh --> GenerateNotifications : refresh Home/Insights screen
+GenerateNotifications --> PersistIfDue : [time since last generation > 8,000 ms] / run alert engine
+GenerateNotifications --> SkipNotifGen : [throttled]
+PersistIfDue --> Idle : [every 4 ticks] / persist device and history
+SkipNotifGen --> Idle
+SnapshotFailed --> Idle : log error, no state change
+```
+**Events:**
+| Event | Source |
+|---------------------------|----------------------------|
+| telemetry tick fires | Hardware timer (periodic) |
+| sensor values read | Sensor hardware / BLE / Cloud |
+| sensor read error | Hardware fault |
+**Guards:**
+| Guard | Condition |
+|---------------------------------------|----------------------------------------|
+| age since last sample > 10,000 ms | Throttle: one sample per 10 seconds |
+| time since last generation > 8,000 ms | Throttle: notification generation |
+| every 4 ticks | Persistence: ~60 s at normal speed |
+**Outputs:**
+| Action | Description |
+|-------------------------|--------------------------------------------------|
+| merge into sensors | Assign ph, waterTemp, airTemp, humidity, cwbeLevel, cwbeStatus,
+pumpActive |
+| lastUpdate = now | Set timestamp for staleness tracking |
+| compute connectionStatus| online / warning / offline (see Section 15) |
+| record sample | Append sample to rolling history buffer |
+| refresh Home screen | Re-render dashboard if Home or Insights is visible |
+| run alert engine | Evaluate all notification conditions |
+| persist device | Write device state to storage |
+---
+## 6. Sensor Validation State Machine
+This state machine describes the per-sensor validation that runs for each field in the telemetry
+snapshot.
+```mermaid
+stateDiagram-v2
+[*] --> CheckPresence
+CheckPresence --> CheckRange : [value is numeric]
+CheckPresence --> MissingData : [value is null / NaN / undefined]
+CheckRange --> Valid : [value within physical plausibility bounds]
+CheckRange --> InvalidData : [value outside plausibility bounds]
+Valid --> ComputeInsight : apply getSensorInsight(key, value, stage)
+ComputeInsight --> StatusOK : [insight.status = 'ok']
+ComputeInsight --> StatusLow : [insight.status = 'low']
+ComputeInsight --> StatusWarn : [insight.status = 'warn']
+StatusOK --> [*] : display value, no alert
+StatusLow --> [*] : display value, informational indicator
+StatusWarn --> [*] : display value, warning indicator, alert generated
+MissingData --> [*] : display '–', suppress health rules
+InvalidData --> [*] : display '–', suppress health rules, log fault
+```
+**Physical plausibility bounds per sensor:**
+| Sensor | Min | Max |
+|------------|--------|--------|
+| pH | 0.0 | 14.0 |
+| waterTemp | 0 °C | 50 °C |
+| airTemp | 0 °C | 50 °C |
+| humidity | 0 % | 100 % |
+| cwbeLevel | 0 % | 100 % |
+Values outside these bounds are treated as `InvalidData`.
+**Key rule:**
+`getSensorInsight()` is only called when the value is numeric and within plausibility bounds. The
+insight result determines whether an alert will fire during the next notification generation cycle.
+---
+## 7. Health Evaluation State Machine
+```mermaid
+stateDiagram-v2
+[*] --> WaitingForTelemetry : [lastUpdate = null]
+WaitingForTelemetry --> EvaluatingRules : [lastUpdate ≠ null] / first snapshot received
+EvaluatingRules --> CollectFiredRules : evaluate all AGRONOMIST_RULES
+note right of CollectFiredRules
+For each rule:
+if rule.condition(dev) === true → add to firedRules
+if dev.sensors.lastUpdate = null → condition returns false
+end note
+CollectFiredRules --> ComputePenaltyScore : sort firedRules by priority ascending
+ComputePenaltyScore --> DetermineStatusFromScore : score = 100 − sum(penalties)
+DetermineStatusFromScore --> DetermineStatusFromRules
+DetermineStatusFromRules --> MergeStatus : final = max_rank(scoreStatus, ruleStatus)
+MergeStatus --> StatusExcellent : [no rules fired]
+MergeStatus --> StatusGood : [only info rules]
+MergeStatus --> StatusAttention : [any warning rules; no critical]
+MergeStatus --> StatusCritical : [any critical rules]
+StatusExcellent --> OutputReport
+StatusGood --> OutputReport
+StatusAttention --> OutputReport
+StatusCritical --> OutputReport
+OutputReport --> [*] : { status, score, firedRules, confidence, trends, forecasts }
+EvaluatingRules --> EvaluatingRules : on each telemetry tick
+```
+**Status rank for merge operation:**
+| Status | Rank |
+|-----------|------|
+| excellent | 0 |
+| good | 1 |
+| attention | 2 |
+| critical | 3 |
+Final status = status with the highest rank from either scoring method.
+**Score-to-status mapping:**
+| Score | statusFromScore |
+|------------|-----------------|
+| ≥ 85 | excellent |
+| 65 – 84 | good |
+| 40 – 64 | attention |
+| 0 – 39 | critical |
+**Rule-to-status mapping:**
+| Highest severity in firedRules | statusFromRules |
+|--------------------------------|-----------------|
+| critical | critical |
+| warning | attention |
+| info | good |
+| (none) | excellent |
+---
+## 8. Alert Generation State Machine
+```mermaid
+stateDiagram-v2
+[*] --> ThrottleCheck
+ThrottleCheck --> Suppressed : [now - lastRun < 8,000 ms AND NOT forced]
+ThrottleCheck --> BuildDesiredSet : [not throttled OR forced]
+Suppressed --> [*]
+BuildDesiredSet --> EvaluateReservoir : check cwbeLevel, daysRemaining
+EvaluateReservoir --> EvaluateTelemetry : check lastUpdate age
+EvaluateTelemetry --> EvaluatePH : check pH insight
+EvaluatePH --> EvaluateWaterTemp : check waterTemp insight
+EvaluateWaterTemp --> EvaluateAirTemp : check airTemp insight
+EvaluateAirTemp --> EvaluateHumidity : check humidity insight
+EvaluateHumidity --> EvaluateAlignment : check LED/irrigation alignment
+EvaluateAlignment --> MergeWithExisting
+MergeWithExisting --> PreserveOngoing : keep alerts whose dedupKey still in desiredSet
+PreserveOngoing --> RemoveCleared : remove alerts whose dedupKey no longer in desiredSet
+RemoveCleared --> AddNew : create new alert entries for newly fired conditions
+AddNew --> TrimToLimit : [total count > 50] / drop oldest
+TrimToLimit --> Persist : write to storage
+Persist --> UpdateBadge : update bell badge count
+UpdateBadge --> [*] : set lastRun = now
+```
+**Alert deduplication logic:**
+Each state-based alert carries a `dedupKey` (e.g., `reservoir-crit-dev-001`). On each generation run:
+1. The desired set is computed fresh from current sensor values.
+2. Existing alerts with dedupKeys that are still in the desired set are **preserved** (their `createdAt`
+and `read` status are retained). Their text is updated if the message has changed.
+3. Existing alerts with dedupKeys that are **no longer** in the desired set are **removed**.
+4. Alerts in the desired set that are **not** in the existing set are **created** as new entries.
+5. Event alerts (no dedupKey) are **never removed** by this process.
+**Alert severity evaluation chain:**
+| Condition Evaluated | Alert Key Pattern | Severity |
+|---------------------------------------------|-------------------------|----------|
+| cwbeLevel ≤ 5 % | reservoir-crit-{did} | critical |
+| daysRemaining < 1 | refill-today-{did} | critical |
+| daysRemaining ≤ 3 | refill-soon-{did} | warning |
+| lastUpdate age > 120,000 ms | telemetry-stale-{did} | critical |
+| pH insight = 'warn' | ph-warn-{did} | warning |
+| pH insight = 'low' | ph-low-{did} | warning |
+| waterTemp insight = 'warn' | wt-warn-{did} | warning |
+| airTemp insight = 'warn' | at-warn-{did} | warning |
+| airTemp insight = 'low' | at-low-{did} | warning |
+| humidity insight = 'warn' | rh-warn-{did} | warning |
+| humidity insight = 'low' | rh-low-{did} | warning |
+| irrigation/LED misalignment | irr-align-{did} | warning |
+---
+## 9. Recommendation Generation State Machine
+```mermaid
+stateDiagram-v2
+[*] --> CheckTelemetryAvailable
+CheckTelemetryAvailable --> TelemetryOffline : [lastUpdate = null OR age > 300,000 ms]
+CheckTelemetryAvailable --> EvaluateRules : [telemetry available]
+TelemetryOffline --> [*] : output = { telemetryOffline: true, firedRules: [] }
+EvaluateRules --> RulesPassed : for each rule in AGRONOMIST_RULES
+RulesPassed --> SortByPriority : firedRules sorted ascending by priority number
+SortByPriority --> ComputeHealth : _computeHealthFromRules(firedRules)
+ComputeHealth --> ComputeTrends : analyze history samples
+ComputeTrends --> ComputeConfidence : assess history coverage
+ComputeConfidence --> ResolvePlantScope : collect all plant profiles from savedPlants
+ResolvePlantScope --> ComputeCompatibility : cross-species range intersection
+ComputeCompatibility --> ComputeDominant : identify dominant crop by site count
+ComputeDominant --> ComputeLimiting : identify limiting crop by compatibility score
+ComputeLimiting --> ComputeStress : compute per-species sensor deviation
+ComputeStress --> AssembleReport
+AssembleReport --> [*] : return AgronomistReport {
+generatedAt, deviceId, confidence, health,
+firedRules, historicalInsights, forecasts,
+context, plantProfile, plantScope, cropCompatibility,
+dominantCrop, limitingCropAnalysis, cropStress,
+telemetryOffline, telemetryLastUpdate
+}
+```
+**Trend computation (per parameter):**
+```
+trendWindow = last 10 samples
+if sampleCount < 3 → 'unknown'
+split window into first half and second half
+meanFirst = average of first half values
+meanSecond = average of second half values
+delta = meanSecond - meanFirst
+if delta > threshold → 'rising'
+if delta < -threshold → 'falling'
+else → 'stable'
+```
+Thresholds: pH=0.20, waterTemp=0.50°C, airTemp=0.50°C, humidity=3.00%, cwbeLevel=3.00%
+**Confidence computation:**
+```
+if sampleCount < 3: { score: 0.00, label: 'none' }
+coverageHours = (samples[-1].t - samples[0].t) / 3,600,000
+if coverageHours >= 24: { score: 1.00, label: 'extended' }
+if coverageHours >= 6: { score: 0.80, label: 'limited' }
+if coverageHours >= 1: { score: 0.55, label: 'partial' }
+else: { score: 0.30, label: 'live' }
+```
+---
+## 10. Dashboard Refresh State Machine
+```mermaid
+stateDiagram-v2
+[*] --> Idle
+Idle --> RenderingHome : [active screen = 'home'] / telemetry tick or action
+Idle --> RenderingInsights : [active screen = 'cwbe'] / telemetry tick or action
+Idle --> RenderingOther : [active screen = other] / action only
+RenderingHome --> BuildHomeScreen : read active device state
+BuildHomeScreen --> RenderCWBEHero : compute lvl, cwbeStatus, forecast
+RenderCWBEHero --> RenderSensorGrid : pH, waterTemp, airTemp, humidity tiles
+RenderSensorGrid --> RenderPumpCard : pumpActive state
+RenderPumpCard --> RenderQuickNav : navigation tiles
+RenderQuickNav --> CommitToDisplay : assemble complete screen
+CommitToDisplay --> Idle
+RenderingInsights --> BuildInsightsScreen : read device state + history
+BuildInsightsScreen --> RunAgronomistReport : getAgronomistReport(dev)
+RunAgronomistReport --> RenderAgroCard : assemble observation blocks
+RenderAgroCard --> CommitToDisplay
+CommitToDisplay --> Idle
+RenderingOther --> BuildOtherScreen : read relevant device state
+BuildOtherScreen --> CommitToDisplay
+```
+**Key rule:**
+Telemetry ticks only trigger a re-render if the active screen is 'home' or 'cwbe' (Insights). Other
+screens (LED editor, irrigation editor, plants picker) are not refreshed by telemetry ticks — only by
+explicit operator actions.
+This prevents screen disruption while the operator is editing configuration.
+---
+## 11. Screen Navigation State Machine
+```mermaid
+stateDiagram-v2
+[*] --> Home
+Home --> Plants : navigate('plants') / discard draft
+Home --> LED : navigate('led') / discard draft
+Home --> Irrigation : navigate('irrigation') / discard draft
+Home --> Insights : navigate('cwbe') / discard draft
+Home --> Profile : navigate('profile')
+Home --> Notifications : bell tap / open notification sheet
+Home --> DeviceSelector : device name tap / open device selector sheet
+Plants --> Home : navigate('home') / discard plant draft
+Plants --> PlantPicker : pick plant action
+PlantPicker --> Plants : confirm or cancel
+LED --> Home : navigate away / [editing=false] discard LED draft
+LED --> LEDEditor : edit button / ledEditing = true
+LEDEditor --> LED : save OR cancel / ledEditing = false
+Irrigation --> Home : navigate away / discard irrigation draft
+Irrigation --> IrrigationEditor : edit button / irrigationEditing = true
+IrrigationEditor --> Irrigation : save OR cancel / irrigationEditing = false
+Insights --> Home : navigate('home')
+Profile --> Home : back button
+Notifications --> Home : backdrop tap or swipe down
+DeviceSelector --> Home : device selected or dismissed
+```
+**discard draft behavior on navigation:**
+Each screen maintains an unsaved draft. When the operator navigates away, the draft is discarded
+and the saved configuration is restored.
+| Screen | Draft Fields Discarded |
+|------------|---------------------------------------------------------------|
+| Plants | dev.plants restored from dev.savedPlants; picker closed |
+| LED | dev.led restored from dev.savedLed; ledEditing = false |
+| Irrigation | dev.irrigation restored from dev.savedIrrigation; irrigationEditing = false; pump timer
+cleared |
+Navigation actions always reset the scroll position of the destination screen to the top.
+---
+## 12. Touch Interaction State Machine
+```mermaid
+stateDiagram-v2
+[*] --> WaitingForTouch
+WaitingForTouch --> TouchDetected : touch down event
+TouchDetected --> IdentifyTarget : determine data-action attribute
+IdentifyTarget --> DispatchAction : [valid action found] / call Actions[action](data)
+IdentifyTarget --> Ignore : [no action found]
+DispatchAction --> MutateState : action modifies appState
+MutateState --> TriggerRender : re-render affected screen
+TriggerRender --> WaitingForTouch
+Ignore --> WaitingForTouch
+```
+**Action dispatch mechanism:**
+All interactive elements carry a `data-action` attribute that names the handler in the `Actions`
+object, plus optional `data-*` attributes that provide parameters.
+Examples:
+| data-action | Parameters | Handler Behavior |
+|---------------------|-------------------------|-----------------------------------------|
+| navigate | data-screen | Navigate to named screen |
+| togglePump | (none) | Invert pumpActive; show toast |
+| adjustTank | data-delta | Adjust tankLiters by delta or preset |
+| saveLedConfig | (none) | Commit led draft to savedLed |
+| saveIrrigationConfig| (none) | Commit irrigation draft to savedIrrigation |
+| openDeviceSelector | (none) | Open device selector overlay |
+**Touch active feedback:**
+Interactive elements apply an active opacity (typically 0.55–0.70) on press. Interactive cards apply a
+scale transform (0.965) on press. This feedback must be implemented in firmware UI rendering.
+---
+## 13. LED Configuration State Machine
+```mermaid
+stateDiagram-v2
+[*] --> LedSummaryView
+LedSummaryView --> LedEditorView : tap "Edit LED" / ledEditing = true
+LedEditorView --> SelectPreset : tap preset button
+LedEditorView --> EditOnTime : tap ON time field
+LedEditorView --> EditOffTime : tap OFF time field
+LedEditorView --> AdjustIntensity : slide intensity slider
+SelectPreset --> LedEditorView : preset applied / fill on, off, intensity from LED_PRESETS[preset]
+note right of SelectPreset
+Selecting Seedling/Standard/Bloom/Off
+overwrites on, off, intensity with preset values.
+Manually changing any field sets preset = 'custom'.
+end note
+EditOnTime --> LedEditorView : time confirmed
+EditOffTime --> LedEditorView : time confirmed
+AdjustIntensity --> LedEditorView : slider released / update intensity, set preset = 'custom' if not
+matching any preset
+LedEditorView --> CommitLed : tap "Save LED" / [valid times]
+LedEditorView --> DiscardLed : tap "Cancel"
+CommitLed --> LedSummaryView : dev.savedLed = { ...dev.led }; ledEditing = false; persist; show
+toast
+DiscardLed --> LedSummaryView : dev.led = { ...dev.savedLed }; ledEditing = false
+LedSummaryView --> LedSummaryView : telemetry tick / re-render status (active/scheduled/off)
+```
+**Preset auto-detection on save:**
+```
+detectLedPreset(led):
+for each preset in LED_PRESETS:
+if led.on = preset.on AND led.off = preset.off AND led.intensity = preset.intensity:
+return preset_key
+return 'custom'
+```
+This is applied when displaying the preset badge after save. It is not a gate on saving.
+**LED status re-evaluation:**
+After every save, the LED status (active / scheduled / off) is recomputed from the current system
+clock against the saved ON/OFF times. Status can change without any operator action (transitions at
+ON time and OFF time each day).
+---
+## 14. Irrigation Configuration State Machine
+```mermaid
+stateDiagram-v2
+[*] --> IrrigationSummaryView
+IrrigationSummaryView --> IrrigationEditorView : tap "Edit irrigation" / irrigationEditing = true
+IrrigationEditorView --> SelectSubstrate : tap substrate card
+IrrigationEditorView --> SelectStage : tap stage selector
+IrrigationEditorView --> AdjustCycleOn : tap +/- stepper for ON time
+IrrigationEditorView --> AdjustCyclePause : tap +/- stepper for PAUSE time
+IrrigationEditorView --> ApplyRecommended : tap "Apply recommended"
+SelectSubstrate --> IrrigationEditorView : substrate updated / recompute recommended cycle
+SelectStage --> IrrigationEditorView : stage updated / recompute recommended cycle
+AdjustCycleOn --> IrrigationEditorView : cycleOn updated
+AdjustCyclePause --> IrrigationEditorView : cyclePause updated / check substrate warnings
+ApplyRecommended --> IrrigationEditorView : fill cycleOn, cyclePause from
+getRecommendedCycle(stage, substrate)
+IrrigationEditorView --> CommitIrrigation : tap "Save" / [valid config]
+IrrigationEditorView --> DiscardIrrigation : tap "Cancel"
+CommitIrrigation --> IrrigationSummaryView : savedIrrigation updated; irrigationSaved = true;
+persist; show toast; generate notifications (forced)
+DiscardIrrigation --> IrrigationSummaryView : restore from savedIrrigation; irrigationEditing = false
+```
+**getRecommendedCycle computation:**
+```
+base = IRRIGATION_MATRIX[stage][substrate]
+tempCategory = getTempCategory(dev.sensors.airTemp)
+cropKey = getCropKey(dominantPlantId)
+tempMod = TEMP_OFF_MODIFIERS[tempCategory] // 1.15 / 1.00 / 0.82 / 0.67
+cropDiv = CROP_OFF_DIVISORS[cropKey] // 1.00 / 0.95 / 0.80 / 0.73 / 0.68 / 1.20
+recommendedON = base.on
+recommendedPAUSE = min(360, max(15, round(base.off × tempMod / cropDiv)))
+```
+**cyclePause clamps:** minimum 15 min, maximum 360 min (6 hours).
+**cycles per day formula:**
+```
+period = cycleOn + cyclePause
+if nightBreak AND windowStart AND windowEnd:
+windowMins = (windowEnd > windowStart) ? offMins-onMins : 1440-onMins+offMins
+cyclesPerDay = max(0, floor(windowMins / period))
+else:
+cyclesPerDay = floor(1440 / period)
+```
+**runtime per day:**
+```
+runtimePerDay = cyclesPerDay × cycleOn (minutes)
+```
+---
+## 15. Communication Failure and Recovery State Machine
+```mermaid
+stateDiagram-v2
+[*] --> Online
+Online --> Online : telemetry tick received within 120,000 ms / update lastUpdate
+Online --> Warning : lastUpdate age > 120,000 ms / connectionStatus = 'warning'
+Warning --> Online : telemetry tick received / connectionStatus = 'online' / clear stale alert
+Warning --> Offline : lastUpdate age > 240,000 ms / connectionStatus = 'offline'
+Offline --> Warning : telemetry tick received / connectionStatus = 'warning'
+Offline --> Offline : time passes / maintain last sensor values / stale alert active
+Online --> AgronomistOnline : lastUpdate age ≤ 300,000 ms
+AgronomistOnline --> AgronomistOffline : lastUpdate age > 300,000 ms
+AgronomistOffline --> AgronomistOnline : telemetry tick received
+AgronomistOffline --> AgronomistOffline : crop analysis suspended
+```
+**Thresholds:**
+| Threshold | Value | Effect |
+|-----------|--------------|-------------------------------------------|
+| Stale | 120,000 ms | connectionStatus → 'warning'; stale alert generated |
+| Offline | 240,000 ms | connectionStatus → 'offline' |
+| Agronomist offline | 300,000 ms | Plant analysis suspended |
+**Sensor display during communication failure:**
+Last received sensor values remain displayed (not cleared). Only the live indicator (animated dot)
+distinguishes live data from stale display.
+**Alert behavior:**
+The `telemetry-stale-{did}` alert is generated when `lastUpdate age > 120,000 ms`. It is automatically
+removed from the active alert set when a new snapshot arrives and the next notification generation
+run executes.
+**Recovery:**
+Any valid telemetry snapshot received resets `lastUpdate` to the current timestamp. All status
+thresholds are then recomputed from the new age.
+---
+## 16. Pump Manual Control State Machine
+```mermaid
+stateDiagram-v2
+[*] --> PumpIdle : pumpActive = false
+PumpIdle --> PumpManualRunning : operator tap togglePump / pumpActive = true; send
+hardware command; show toast "Pump activated"
+PumpManualRunning --> PumpIdle : operator tap togglePump / pumpActive = false; send
+hardware command; show toast "Pump stopped"
+PumpIdle --> PumpIdle : telemetry tick [pumpActive = false from hardware]
+PumpManualRunning --> PumpManualRunning : telemetry tick [pumpActive = true from
+hardware]
+PumpManualRunning --> PumpIdle : telemetry update [pumpActive = false] / hardware stopped
+pump
+```
+**States:**
+| State | sensors.pumpActive | Display Label |
+|-------------------|--------------------|------------------------|
+| PumpIdle | false | Idle · on schedule |
+| PumpManualRunning | true | Running · manual |
+**Hardware command:**
+When the operator toggles the pump, a hardware command is dispatched immediately. The
+telemetry snapshot from hardware subsequently confirms the actual state.
+---
+## 17. Tank Adjustment State Machine
+```mermaid
+stateDiagram-v2
+[*] --> TankAtLevel
+TankAtLevel --> TankAdjusting : operator taps adjustment button
+TankAdjusting --> ComputeTarget : determine target from delta or preset
+note right of ComputeTarget
+delta = '-0.5' → target = current - 0.5
+delta = '+0.5' → target = current + 0.5
+delta = '+1.0' → target = current + 1.0
+delta = 'nominal' → target = 6.0 L
+delta = 'max' → target = 6.5 L
+end note
+ComputeTarget --> ClampTarget : target = clamp(target, 0, 6.5)
+ClampTarget --> UpdateTankState : tankLiters = clamped target
+UpdateTankState --> RecomputeCWBE : lvl = round(tankLiters / 6.5 × 100)
+RecomputeCWBE --> UpdateCWBEStatus : status = lvl < 15 ? 'critical' : lvl < 30 ? 'low' : 'ok'
+UpdateCWBEStatus --> PersistDevice
+PersistDevice --> LogEventNotification : addEventNotification('refill', 'info', ...)
+LogEventNotification --> Render : re-render Home screen
+Render --> TankAtLevel
+```
+---
+## 18. Notification Center State Machine
+```mermaid
+stateDiagram-v2
+[*] --> Closed
+Closed --> Opening : bell tap
+Opening --> Open : sheet animation complete
+Open --> MarkingRead : tap notification card
+MarkingRead --> Open : notification.read = true; persist; update badge
+Open --> Clearing : tap "Clear All"
+Clearing --> Open : notifications = []; persist; badge = 0
+Open --> Closing : tap backdrop or swipe down
+Closing --> Closed : sheet animation complete
+Open --> Open : new alert arrives / re-render list
+```
+**Badge count computation:**
+```
+unreadCount = notifications.filter(n => !n.read).length
+if unreadCount = 0: hide badge
+if unreadCount > 0: display badge with count
+```
+Badge is always visible when `unreadCount > 0`, regardless of which screen is active.
+---
+## 19. Future Integration Points
+### 19.1 CWBE Integration Point
+The CWBE (Crop Water Balance Efficiency) module will be integrated as an extension to the Health
+Evaluation State Machine without requiring structural changes.
+```mermaid
+stateDiagram-v2
+[*] --> EvaluateRules
+EvaluateRules --> EvaluateSensorRules : existing pipeline (rules 10-51)
+EvaluateSensorRules --> EvaluateCWBERules : [FUTURE] CWBE rules (priority 60-69)
+EvaluateCWBERules --> ComputeHealth
+ComputeHealth --> [*]
+```
+**Reserved integration state in Health Evaluation:**
+After rule priority group 51 (reservoir rules), a CWBE rule group at priorities 60–69 will be added. No
+existing rule priorities need to change. The health score computation and status derivation remain
+identical.
+**Reserved telemetry field:** `sensors.cwbeLevel` (currently used as reservoir percentage) will be
+supplemented or replaced by the CWBE efficiency score. The history sample already records
+`cwbeLevel`, providing continuity.
+### 19.2 AI Assistant Integration Point
+The current Agronomist chat processes questions through a deterministic rule-based router. The AI
+integration point replaces the response generation step without changing the input/output
+interface.
+```mermaid
+stateDiagram-v2
+[*] --> ReceiveQuestion
+ReceiveQuestion --> BuildContext : buildAgronomistContext(dev)
+BuildContext --> RouteIntent : classify question intent
+RouteIntent --> RuleBasedResponse : [V1: rule engine]
+RouteIntent --> AIBackendRequest : [FUTURE: LLM API call]
+RuleBasedResponse --> DisplayResponse
+AIBackendRequest --> DisplayResponse
+DisplayResponse --> [*]
+```
+The `buildAgronomistContext(dev)` function and the chat history/display infrastructure remain
+unchanged. Only the response generation function is replaced.
+---
+## 20. State Summary Tables
+### 20.1 All Named System States
+| State Machine | State | Description |
+|------------------------|----------------------|------------------------------------------------|
+| System | Startup | Hardware power-on |
+| System | Initializing | Restoring stored state |
+| System | WaitingForTelemetry | No sensor data yet received |
+| System | Operating | Normal telemetry-driven operation |
+| System | CommunicationWarning | Telemetry delayed >120 s |
+| System | CommunicationOffline | Telemetry absent >240 s |
+| System | Shutdown | Power-off sequence |
+| Telemetry | Idle | Between ticks |
+| Telemetry | Sampling | Sensor read in progress |
+| Telemetry | ApplySnapshot | Merging values into device state |
+| Telemetry | RecordHistorySample | Appending sample to rolling buffer |
+| Telemetry | SnapshotFailed | Sensor read error |
+| Health | WaitingForTelemetry | lastUpdate = null; no evaluation |
+| Health | EvaluatingRules | Rule conditions being evaluated |
+| Health | StatusExcellent | Score ≥ 85, no warning/critical rules |
+| Health | StatusGood | Score ≥ 65, only info rules |
+| Health | StatusAttention | Score ≥ 40, warning rules active |
+| Health | StatusCritical | Critical rules active |
+| Alert | ThrottleCheck | Checking generation interval |
+| Alert | Suppressed | Generation skipped (throttled) |
+| Alert | BuildDesiredSet | Evaluating all alert conditions |
+| Alert | MergeWithExisting | Reconciling desired vs. current alerts |
+| Navigation | Home | Home screen active |
+| Navigation | Plants | Plant configuration screen |
+| Navigation | LED | LED summary screen |
+| Navigation | LEDEditor | LED configuration editor open |
+| Navigation | Irrigation | Irrigation summary screen |
+| Navigation | IrrigationEditor | Irrigation configuration editor open |
+| Navigation | Insights | Water stats / Agronomist screen |
+| Navigation | Profile | Operator profile screen |
+| Navigation | Notifications | Notification center sheet open |
+| Navigation | DeviceSelector | Device picker sheet open |
+| Pump | PumpIdle | Pump not running |
+| Pump | PumpManualRunning | Pump running via manual command |
+| Communication | Online | Telemetry fresh (age ≤ 120 s) |
+| Communication | Warning | Telemetry stale (120–240 s) |
+| Communication | Offline | Telemetry absent (> 240 s) |
+| Communication | AgronomistOnline | Plant analysis active (age ≤ 300 s) |
+| Communication | AgronomistOffline | Plant analysis suspended (age > 300 s) |
+### 20.2 All State Transitions with Guards
+| From State | Event | Guard | To State |
+Output |
+|------------------------|----------------------------|-------------------------------|------------------------|-------------------
+---------------------|
+| Startup | power on | — | Initializing | begin stored state
+load |
+| Initializing | state loaded | devices exist | WaitingForTelemetry | select
+active device |
+| Initializing | state loaded | no devices | Initializing | create default
+device |
+| WaitingForTelemetry | snapshot received | — | Operating | apply
+snapshot, render |
+| Operating | tick | age ≤ 120 s | Operating | apply snapshot,
+render |
+| Operating | age check | age > 120 s | CommunicationWarning |
+warning indicator, stale alert |
+| CommunicationWarning | snapshot received | — | Operating | clear
+stale alert |
+| CommunicationWarning | age check | age > 240 s | CommunicationOffline |
+offline indicator |
+| CommunicationOffline | snapshot received | — | CommunicationWarning |
+begin recovery |
+| LED Summary | tap edit | — | LED Editor | ledEditing =
+true |
+| LED Editor | tap save | — | LED Summary | commit
+savedLed, toast, generate alerts|
+| LED Editor | tap cancel | — | LED Summary | discard
+draft |
+| LED Editor | tap preset | preset ≠ current | LED Editor | fill
+on/off/intensity from preset |
+| Irrigation Summary | tap edit | — | Irrigation Editor |
+irrigationEditing = true |
+| Irrigation Editor | tap save | — | Irrigation Summary | commit
+savedIrrigation, irrigationSaved=true |
+| Irrigation Editor | tap cancel | — | Irrigation Summary | discard
+draft |
+| Pump Idle | tap toggle | — | Pump Running |
+pumpActive=true, hw command, toast |
+| Pump Running | tap toggle | — | Pump Idle |
+pumpActive=false, hw command, toast |
+| Pump Running | telemetry update | hardware pumpActive=false | Pump
+Idle | reflect hardware state |
+| Notification Center | tap backdrop | — | Closed | sheet dismiss
+animation |
+| Notification Center | tap entry | — | Open | mark read,
+update badge |
+| Notification Center | tap clear all | — | Open | clear all, badge =
+0 |
+| Health Excellent | any info rule fires | — | Health Good | update
+display |
+| Health Good | any warning rule fires | — | Health Attention | update
+display |
+| Health Any | any critical rule fires | — | Health Critical | update
+display, alert generated |
+| Health Critical | all critical rules clear | no warning rules | Health Attention or lower |
+update display |
+| Health Critical | all critical rules clear | only info rules | Health Good | update
+display |
+| Health Critical | all rules clear | — | Health Excellent | update
+display |
+---
+*End of Document — GL Towers Dashboard State Machine Specification v1.0*

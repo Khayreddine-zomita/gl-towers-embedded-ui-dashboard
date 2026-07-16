@@ -272,6 +272,19 @@
 			src_path="images/icons/home_water-pump_24px.png"
 		/>
 
+		<!-- legal QR codes: Terms & Conditions / Privacy Policy-->
+		<data
+			name="img_qr_terms_conditions_1"
+			color_format="argb8888"
+			src_path="images/legal/img_qr_terms_conditions_1.png"
+		/>
+
+		<data
+			name="img_qr_privacy_policy_1"
+			color_format="argb8888"
+			src_path="images/legal/img_qr_privacy_policy_1.png"
+		/>
+
 		<!-- Top Status Bar Icons -->
 		<data name="img_top_status_bar_wifi" color_format="argb8888" src_path="images/icons/wifi_signal_16px.png" />
 

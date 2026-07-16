@@ -181,9 +181,6 @@
 					style_border_color="#COLOR_DIVIDER"
 					style_text_color="#COLOR_TEXT_PRIMARY"
 					style_text_font="font_inter_11"
-					style_bg_color-selected="#COLOR_LIGHT_GREEN"
-					style_bg_opa-selected="255"
-					style_text_color-selected="#COLOR_PRIMARY_GREEN"
 				/>
 			</lv_dropdown>
 

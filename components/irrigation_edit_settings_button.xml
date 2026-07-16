@@ -19,7 +19,7 @@
 		style_shadow_offset_y="3"
 	>
 		<lv_button
-			name="led_edit_settings_btn"
+			name="irrigation_edit_settings_btn"
 			x="12"
 			y="5"
 			width="432"
@@ -34,7 +34,7 @@
 			style_shadow_width="0"
 		>
 			<lv_label
-				name="led_edit_settings_label"
+				name="irrigation_edit_settings_label"
 				x="0"
 				y="3"
 				width="440"

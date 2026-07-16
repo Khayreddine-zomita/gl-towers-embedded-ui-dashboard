@@ -1,4 +1,4 @@
-﻿<component>
+<component>
 	<api>
 		<prop name="reservoir_value" type="string" />
 		<prop name="reservoir_unit_x" type="int" />
@@ -112,5 +112,3 @@
 		/>
 	</view>
 </component>
-
-

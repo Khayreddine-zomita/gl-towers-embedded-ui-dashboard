@@ -1,0 +1,47 @@
+<screen name="screen_saver">
+	<view
+		width="480"
+		height="320"
+		scrollable="false"
+		scrollbar_mode="off"
+		style_bg_color="#COLOR_DARK_FOREST"
+		style_bg_opa="255"
+		style_pad_all="0"
+		style_border_width="0"
+		style_radius="0"
+	>
+		<screen_saver_status_card
+			x="14"
+			y="26"
+			time_text="13:20"
+			system_status="Healthy"
+			system_status_color="#COLOR_PRIMARY_GREEN"
+			reservoir_value="92"
+			reservoir_unit_x="88"
+			reservoir_volume="6.0 L / 6.5 L"
+			pump_status="Pump ON"
+			pump_status_color="#COLOR_PRIMARY_GREEN"
+			led_status="LED ON"
+			led_status_color="#COLOR_ALERT_ORANGE"
+			wifi_status="WiFi OK"
+			wifi_status_color="#COLOR_STATUS_INFO"
+			hint_text="Tap anywhere to wake"
+		/>
+
+		<!-- Invisible full-screen wake layer -->
+		<lv_button
+			name="screen_saver_wake_btn"
+			x="0"
+			y="0"
+			width="480"
+			height="320"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_opa="0"
+			style_radius="0"
+			style_border_width="0"
+			style_shadow_width="0"
+			style_pad_all="0"
+		/>
+	</view>
+</screen>

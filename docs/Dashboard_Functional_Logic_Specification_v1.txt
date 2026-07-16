@@ -1,0 +1,1290 @@
+GL Towers Dashboard
+# Functional Logic Specification
+**Version 1.0**
+## Table of Contents
+1. [Purpose](#1-purpose)
+2. [System Architecture Overview](#2-system-architecture-overview)
+3. [Dashboard Philosophy](#3-dashboard-philosophy)
+4. [Dashboard Refresh Cycle](#4-dashboard-refresh-cycle)
+5. [Sensor Inputs](#5-sensor-inputs)
+- 5.1 pH
+- 5.2 Water Temperature
+- 5.3 Air Temperature
+- 5.4 Relative Humidity
+6. [Health Status Engine](#6-health-status-engine)
+7. [Health Score](#7-health-score)
+8. [Dashboard Modules](#8-dashboard-modules)
+- 8.1 Home Screen — CWBE Reservoir Module
+- 8.2 pH Module
+- 8.3 Water Temperature Module
+- 8.4 Air Temperature Module
+- 8.5 Relative Humidity Module
+- 8.6 Water Consumption Module
+- 8.7 Water Tank Module
+- 8.8 Pump Module
+- 8.9 LED Module
+- 8.10 Photoperiod Module
+- 8.11 Alert Module
+- 8.12 Recommendation / Agronomist Module
+- 8.13 Connectivity Module
+9. [Alert Engine](#9-alert-engine)
+10. [Recommendation Engine](#10-recommendation-engine)
+11. [Missing Data Handling](#11-missing-data-handling)
+12. [Communication Errors](#12-communication-errors)
+13. [Refresh Strategy](#13-refresh-strategy)
+14. [Reserved Future Modules](#14-reserved-future-modules)
+15. [Appendix](#15-appendix)
+---
+## 1. Purpose
+This document is the authoritative functional logic specification for the GL Towers Dashboard
+Version 1.0. It describes the complete operational behavior of every dashboard component: sensor
+processing, health evaluation, alert generation, recommendation logic, state management, and user
+interaction handling.
+The primary audience is the embedded firmware team responsible for recreating the dashboard
+behavior inside the embedded touchscreen display. No web source code is required in addition to
+this document.
+---
+## 2. System Architecture Overview
+### 2.1 Component Topology
+The GL Towers Dashboard is organized around five conceptual layers:
+```
+┌─────────────────────────────────────────────────────────────┐
+│ TELEMETRY LAYER │
+│ Sensor data arrives via telemetry provider (BLE / cloud │
+│ / simulation). Each update is a snapshot containing: │
+│ ph, waterTemp, airTemp, humidity, cwbeLevel, cwbeStatus, │
+│ pumpActive. │
+└────────────────────────┬────────────────────────────────────┘
+│ applySnapshot()
+┌────────────────────────▼────────────────────────────────────┐
+│ STATE LAYER │
+│ Single source of truth. One active device at a time. │
+│ Device state: sensors, plants, irrigation, LED, history. │
+│ Global state: alerts, profile, settings. │
+└────────────────────────┬────────────────────────────────────┘
+│ render triggers
+┌────────────────────────▼────────────────────────────────────┐
+│ LOGIC / ENGINE LAYER │
+│ Health engine, alert engine, recommendation engine, │
+│ consumption estimator, refill forecaster, LED status │
+│ resolver, irrigation alignment checker. │
+└────────────────────────┬────────────────────────────────────┘
+│ computed results
+┌────────────────────────▼────────────────────────────────────┐
+│ PRESENTATION LAYER │
+│ Dashboard screen composed of modules. Each module reads │
+│ from state and engine results. No logic in presentation. │
+└────────────────────────┬────────────────────────────────────┘
+│ touch events
+┌────────────────────────▼────────────────────────────────────┐
+│ INTERACTION LAYER │
+│ Touch actions dispatch to the Actions object. │
+│ Actions mutate state, then trigger re-render. │
+└─────────────────────────────────────────────────────────────┘
+```
+### 2.2 Device Data Model
+Each managed tower (device) maintains the following persistent state:
+| Field | Type | Description |
+|---------------------|----------|-------------------------------------------------------|
+| `id` | string | Unique device identifier (generated at creation) |
+| `hardwareId` | string | Hardware MAC / BLE device ID / cloud token (null until paired) |
+| `name` | string | Human-readable tower name |
+| `room` | string | Optional room label |
+| `tankLiters` | float | Virtual reservoir fill level in liters |
+| `irrigationSaved` | boolean | True when irrigation has been configured and saved |
+| `sensors` | object | Current telemetry snapshot (transient, not persisted) |
+| `savedPlants` | object | Confirmed crop configuration |
+| `savedLed` | object | Confirmed LED schedule |
+| `savedIrrigation` | object | Confirmed irrigation program |
+| `telemetryHistory` | object | Rolling sample array (up to 480 samples) |
+| `metadata` | object | Device ID, firmware version, connection status |
+### 2.3 Default Device State
+When a device is created with no prior configuration, the following defaults apply:
+| Parameter | Default Value |
+|-------------------|----------------------|
+| pH | 6.2 |
+| Water Temperature | 22.0 °C |
+| Air Temperature | 23.5 °C |
+| Humidity | 70 % |
+| CWBE Level | 75 % |
+| CWBE Status | ok |
+| Pump | inactive |
+| LED preset | Standard (06:00–22:00, 80%) |
+| Substrate | Hydroponic |
+| Growth stage | Vegetative |
+| Irrigation ON | 1 min |
+| Irrigation PAUSE | 90 min |
+| Tank fill | 6.0 L (nominal capacity) |
+---
+## 3. Dashboard Philosophy
+### 3.1 Data-Driven Display
+Every value displayed on the dashboard is derived directly from the sensor telemetry snapshot and
+the user-configured parameters. No values are estimated or interpolated for display purposes unless
+explicitly stated in this document. The display always reflects the most recent valid snapshot.
+### 3.2 Single Active Device
+The dashboard displays data for one active device at a time. Multi-device selection is available at the
+navigation level, but all modules show only the active device.
+### 3.3 Degraded Mode Operation
+When telemetry data is unavailable or stale, the dashboard does not display incorrect data. Instead,
+modules enter defined degraded states and display explicit indicators rather than potentially
+incorrect values.
+### 3.4 Rule-Based Intelligence
+All health evaluations, alerts, and recommendations are produced by a deterministic rule engine. No
+machine learning or probabilistic inference is used in Dashboard V1. The firmware can reproduce all
+outputs exactly by implementing the same rules with the same threshold values.
+### 3.5 Draft vs. Saved State
+For LED and irrigation configuration, the dashboard maintains a two-layer state: a draft (being
+edited) and a saved (confirmed) configuration. All operational logic (health engine, alert engine, refill
+forecast) operates exclusively on saved configuration. Draft changes have no effect on health
+evaluations until explicitly saved by the operator.
+---
+## 4. Dashboard Refresh Cycle
+### 4.1 Telemetry Tick
+The dashboard refresh is event-driven from the telemetry provider. In the current implementation,
+the telemetry provider fires a new sensor snapshot at the following configurable intervals:
+| Speed Setting | Tick Interval |
+|---------------|---------------|
+| Slow | 30,000 ms |
+| Normal | 15,000 ms |
+| Fast | 5,000 ms |
+Default speed: **Normal (15,000 ms)**.
+### 4.2 Actions on Each Telemetry Tick
+When a new telemetry snapshot is received, the following sequence executes:
+1. Merge snapshot into active device sensors: `{ ph, waterTemp, airTemp, humidity, waterLevel,
+pumpActive, lastUpdate: now }`
+2. Update device connection metadata (compute `connectionStatus` from timestamp age).
+3. Record a history sample if minimum sample interval (10,000 ms) has elapsed since the previous
+sample.
+4. Re-render the Home screen if it is currently active.
+5. Update the Agronomist telemetry strip (health summary band at top of agronomist panel).
+6. Run the notification generation engine (throttled to a minimum interval of 8,000 ms between
+runs).
+7. Persist device state to storage every 4 ticks (~60 s at normal speed).
+### 4.3 History Recording
+The telemetry history is a rolling circular buffer with the following parameters:
+| Parameter | Value |
+|--------------------------|------------------|
+| Maximum samples | 480 |
+| Minimum sample interval | 10,000 ms |
+| Maximum stored coverage | ~2 hours at 15 s ticks |
+Each history sample contains: `{ t, ph, waterTemp, airTemp, humidity, waterLevel, tankLiters,
+stabilityScore }`.
+Old samples are removed (FIFO) when the buffer reaches 480 entries. The history is persisted to
+storage every 4 recorded samples.
+### 4.4 Screen Refresh on Navigation
+Navigation actions trigger a full screen re-render. Sensor values displayed are always the last
+received telemetry snapshot at the moment of render.
+---
+## 5. Sensor Inputs
+### 5.1 pH
+| Attribute | Value |
+|------------------|---------------------------------------------|
+| Sensor type | pH probe in nutrient solution |
+| Unit | pH units (dimensionless, range 0–14) |
+| Telemetry field | `sensors.ph` |
+| Refresh | Every telemetry tick (see Section 4.1) |
+| Display precision | 2 decimal places (e.g., 6.20) |
+**Validation:**
+Any numeric value in the range 0.0–14.0 is accepted. Values outside this range indicate a sensor
+fault and must be treated as missing data.
+**Missing data behavior:**
+If `sensors.lastUpdate === null`, the sensor tile displays "–" and the health engine does not evaluate
+pH rules.
+**Display behavior:**
+The pH value is displayed in the Sensor Grid on the Home screen. The tile background top-bar is
+colored green (brand color). The value is shown in large numeric type with no unit suffix.
+**Insight mapping (getSensorInsight):**
+| pH Value Range | Status Code | Display Text |
+|------------------|-------------|--------------------|
+| < 5.5 | warn | Critical low |
+| 5.5 – < 5.8 | low | Slightly low |
+| 5.8 – 6.5 | ok | Stable |
+| > 6.5 – ≤ 7.2 | low | Slightly high |
+| > 7.2 – ≤ 7.5 | warn | High |
+| > 7.5 | warn | Critical high |
+---
+### 5.2 Water Temperature
+| Attribute | Value |
+|------------------|---------------------------------------------|
+| Sensor type | Temperature probe in nutrient solution |
+| Unit | Degrees Celsius (°C) |
+| Telemetry field | `sensors.waterTemp` |
+| Refresh | Every telemetry tick |
+| Display precision | 1 decimal place (e.g., 21.5°C) |
+**Validation:**
+Any numeric value. Physical plausibility range: 0–50 °C. Values outside plausible range indicate
+sensor fault.
+**Missing data behavior:**
+If `sensors.lastUpdate === null`, displays "–" and health engine rules for water temperature do not
+fire.
+**Display behavior:**
+Displayed in Sensor Grid. Tile background top-bar is blue. Unit suffix "°" is shown.
+**Insight mapping (getSensorInsight):**
+| Water Temp Range | Status Code | Display Text |
+|------------------|-------------|---------------------------|
+| < 16 °C | warn | Too cold |
+| 16 – < 18 °C | low | Slightly cool |
+| 18 – < 23 °C | ok | Optimal |
+| 23 – < 25 °C | low | Slightly warm |
+| 25 – < 27 °C | low | Warm |
+| ≥ 27 °C | warn | Too warm — low O₂ risk |
+---
+### 5.3 Air Temperature
+| Attribute | Value |
+|------------------|---------------------------------------------|
+| Sensor type | Temperature sensor inside tower enclosure |
+| Unit | Degrees Celsius (°C) |
+| Telemetry field | `sensors.airTemp` |
+| Refresh | Every telemetry tick |
+| Display precision | 1 decimal place |
+**Validation:**
+Physical plausibility range: 0–50 °C.
+**Missing data behavior:**
+If `sensors.lastUpdate === null`, displays "–" and health engine rules do not fire.
+**Display behavior:**
+Displayed in Sensor Grid. Tile background top-bar is amber/orange. Unit suffix "°".
+**Insight mapping (getSensorInsight):**
+| Air Temp Range | Status Code | Display Text |
+|------------------|-------------|---------------------|
+| < 12 °C | warn | Critical cold |
+| 12 – < 16 °C | low | Slightly cool |
+| 16 – < 24 °C | ok | Good for growth |
+| 24 – < 26 °C | low | Slightly warm |
+| 26 – < 28 °C | low | Warm |
+| ≥ 28 °C | warn | Heat stress risk |
+---
+### 5.4 Relative Humidity
+| Attribute | Value |
+|------------------|----------------------------------------------|
+| Sensor type | Humidity sensor inside tower enclosure |
+| Unit | Percent relative humidity (% RH) |
+| Telemetry field | `sensors.humidity` |
+| Refresh | Every telemetry tick |
+| Display precision | Integer (e.g., 90%) |
+**Validation:**
+Valid range: 0–100 %. Values outside this range indicate sensor fault.
+**Missing data behavior:**
+If `sensors.lastUpdate === null`, displays "–" and health engine rules do not fire.
+**Display behavior:**
+Displayed in Sensor Grid. Tile background top-bar is purple. Unit suffix "%".
+**Stage-dependent insight mapping:**
+Humidity targets are growth-stage-dependent. The active stage is taken from `savedIrrigation.stage`.
+Stage-specific target ranges:
+| Growth Stage | RH Target Min | RH Target Max |
+|---------------|---------------|---------------|
+| Germination | 80 % | 96 % |
+| Seedling | 70 % | 96 % |
+| Vegetative | 60 % | 96 % |
+| Mature | 50 % | 96 % |
+**Insight mapping with active stage (getSensorInsight):**
+| Condition | Status | Display Text |
+|------------------------------------|--------|--------------------------------|
+| RH < stage.min − 10 | warn | Very low internal RH |
+| stage.min − 10 ≤ RH < stage.min | low | RH below stability target |
+| stage.min ≤ RH ≤ stage.max | ok | Stable |
+| stage.max < RH ≤ 99 | low | High internal RH |
+| RH > 99 | warn | Near-saturated internal RH |
+**Insight mapping without stage (fallback):**
+| Condition | Status | Display Text |
+|-------------------|--------|--------------------------------|
+| RH < 65 | warn | Very low internal RH |
+| 65 ≤ RH < 80 | low | RH below stability target |
+| 80 ≤ RH ≤ 99 | ok | Stable |
+| RH > 99 | warn | Near-saturated internal RH |
+---
+## 6. Health Status Engine
+The Health Status Engine is the primary classification system that assigns a single operational status
+to the monitored tower based on all available sensor data.
+### 6.1 Status Levels
+The engine produces one of five possible states:
+| Status | Meaning |
+|-----------|----------------------------------------------------------------------|
+| Excellent | All monitored parameters within their optimal ranges. No active rules. |
+| Good | System operating within acceptable bounds. Only informational (info) rules active. |
+| Attention | One or more parameters outside preferred ranges. Warning-level rules active. |
+| Critical | One or more parameters require immediate operator action. Critical-level rules active. |
+| No Data | No telemetry snapshot has been received yet (`lastUpdate === null`). No rules
+evaluated. |
+### 6.2 Rule Evaluation
+The engine maintains a library of agronomist rules (see Section 10 for the full rule library). On each
+telemetry update:
+1. Each rule's `condition` function is evaluated against the current device state.
+2. If a condition guard `dev.sensors.lastUpdate === null` is true, the rule returns false and does not
+fire.
+3. All rules whose conditions evaluate to true are collected as `firedRules`.
+4. `firedRules` are sorted by ascending `priority` (lowest number = highest priority evaluated first).
+### 6.3 Health Score Computation
+The health score is computed from the set of fired rules:
+**Step 1 — Penalty deduction:**
+Start with a base score of **100**.
+For each fired rule, subtract the penalty associated with its severity:
+| Severity | Penalty Deducted |
+|----------|-----------------|
+| critical | − 40 |
+| warning | − 15 |
+| info | − 5 |
+Score is clamped to a minimum of **0**.
+**Step 2 — Status from score:**
+| Score Range | Status from Score |
+|-------------|-------------------|
+| ≥ 85 | excellent |
+| 65 – 84 | good |
+| 40 – 64 | attention |
+| 0 – 39 | critical |
+**Step 3 — Status from rules:**
+Independently of the score:
+| Fired Rule Severities Present | Status from Rules |
+|-------------------------------|-------------------|
+| Any critical rule fired | critical |
+| Any warning rule fired | attention |
+| Any info rule fired | good |
+| No rules fired | excellent |
+**Step 4 — Final status (worst-case merge):**
+The final status is the worse of `statusFromScore` and `statusFromRules`, where severity rank is:
+excellent (0) < good (1) < attention (2) < critical (3).
+```
+final_status = max_rank(statusFromScore, statusFromRules)
+```
+### 6.4 No-Data State
+When `sensors.lastUpdate === null`, the health engine returns no status. The dashboard displays a
+"No Data" indicator rather than any health classification.
+### 6.5 State Transitions
+| Previous State | New Condition | New State |
+|----------------|-----------------------------------|-----------|
+| Any | lastUpdate = null | No Data |
+| No Data | First snapshot received | Evaluated |
+| Excellent | Any info rule fires | Good |
+| Excellent/Good | Any warning rule fires | Attention |
+| Any | Any critical rule fires | Critical |
+| Critical | All critical rules clear | Attention or lower |
+| Attention | All warning rules clear | Good or Excellent |
+| Good | All info rules clear | Excellent |
+---
+## 7. Health Score
+### 7.1 Purpose
+The health score is a single integer value in the range 0–100 that summarizes the operational status
+of the tower in a format suitable for display as a gauge or numeric indicator. It is derived from the
+same rule evaluation as the Health Status Engine.
+### 7.2 Computation
+The health score is computed as described in Section 6.3, Steps 1–2.
+Starting value: **100**
+Deductions applied per fired rule (cumulative).
+Floor: **0** (cannot go below zero).
+### 7.3 Score-to-Status Mapping
+| Score Range | Status Label | Dashboard Color |
+|-------------|--------------|---------------------|
+| 85 – 100 | Excellent | Green |
+| 65 – 84 | Good | Green (lighter) |
+| 40 – 64 | Attention | Amber |
+| 0 – 39 | Critical | Red |
+### 7.4 Display Behavior
+The health score is displayed as a numeric value (0–100) accompanied by the status label. The
+display color follows the color column in the table above.
+A progress bar or arc gauge may optionally visualize the score. The fill level corresponds directly to
+the score value (0 = empty, 100 = full).
+### 7.5 Limitations
+- The health score reflects the current snapshot only. A score of 100 with no history does not imply
+long-term stability.
+- Multiple simultaneous issues stack penalties. A tower with two warning-level issues scores lower
+than a tower with one warning-level issue.
+- The score does not incorporate trend information (rising or falling sensor values) in V1. Trend
+information is used only in the Agronomist panel text.
+### 7.6 Future Evolution
+The health score architecture is designed to accommodate additional penalty sources in future
+versions, including trend penalties, plant-profile deviation scoring, and CWBE efficiency penalties. No
+structural changes are required — additional rules are added to the rule library.
+## 8. Dashboard Modules
+### 8.1 Home Screen — CWBE Reservoir Module
+**Purpose:**
+Displays the current water reservoir fill level, estimated days until refill, a visual progress bar, and
+manual pump controls. This is the primary status summary tile visible immediately on the Home
+screen.
+**Inputs:**
+- `sensors.cwbeLevel` — reservoir fill level in percent (0–100)
+- `sensors.cwbeStatus` — string: 'ok' | 'low' | 'critical'
+- `dev.tankLiters` — current tank fill in liters
+- `TANK_MAX_L` = 6.5 L (physical maximum)
+- `TANK_CAPACITY_L` = 6.0 L (nominal operational capacity)
+**Processing Logic:**
+1. Clamp `dev.tankLiters` to range [0, 6.5].
+2. Compute display level: `lvl = round(tankLiters / 6.5 × 100)`.
+3. Determine CWBE status class:
+| cwbeStatus | Display Color Class |
+|------------|---------------------|
+| ok | Green |
+| low | Amber |
+| critical | Red |
+4. Compute refill forecast (see Section 8.7 / Water Tank Module).
+**Output / Displayed Information:**
+| Element | Content |
+|-------------------------|------------------------------------------------|
+| Level percentage | Integer percentage, e.g., "75%" |
+| Liters display | e.g., "4.9 L / 6.5 L" |
+| Status badge | "Optimal" / "Low warning" / "Critical" with animated dot |
+| Progress bar | Proportional fill, colored by status |
+| Refill forecast | Text label: "Refill in ~N days" or "Refill today" etc. |
+| 24h trend sparkline | Historical cwbeLevel plotted as small line graph |
+| Crop summary chip | Active crop name or "No crops configured" |
+| Pump status chip | "Pump on" (green) or "Pump off" (muted) |
+**Operational States:**
+| State | Condition | Visual Indicator |
+|---------------|--------------------------|--------------------------|
+| Normal | cwbeStatus = 'ok' | Green badge and bar |
+| Low Warning | cwbeStatus = 'low' | Amber badge and bar |
+| Critical | cwbeStatus = 'critical' | Red badge and bar |
+**User Actions:**
+Touch manual adjustment buttons to update tank level. Touch pump chip to toggle pump on/off.
+**Future Expansion:**
+This module is labeled "CWBE Reservoir" in the UI. The CWBE calculation engine is reserved for
+future integration. See Section 14.
+---
+### 8.2 pH Module
+**Purpose:**
+Displays the current pH of the nutrient solution.
+**Inputs:**
+- `sensors.ph` — current pH value
+**Processing Logic:**
+Apply `getSensorInsight('ph', sensors.ph, stage)` to determine status. See Section 5.1.
+**Output / Displayed Information:**
+| Element | Content |
+|---------------|--------------------------------------------|
+| pH value | Numeric, 2 decimal places |
+| Status label | 'Stable' / 'Slightly low' / 'Critical low' / etc. |
+| Tile color | Green accent bar (constant; not linked to alert state in tile) |
+**Operational States:**
+| Status Code | Display Behavior |
+|-------------|-----------------------------------|
+| ok | Value displayed normally |
+| low | Value displayed; informational |
+| warn | Value displayed; alert generated |
+**Missing Data:**
+If `lastUpdate === null`, display "–" in the value field.
+**User Actions:**
+None on the Home screen tile. The Agronomist panel provides detailed pH analysis and
+recommendations.
+---
+### 8.3 Water Temperature Module
+**Purpose:**
+Displays the current temperature of the nutrient solution.
+**Inputs:**
+- `sensors.waterTemp` — current temperature in °C
+**Processing Logic:**
+Apply `getSensorInsight('waterTemp', sensors.waterTemp, stage)`. See Section 5.2.
+**Output / Displayed Information:**
+| Element | Content |
+|--------------------|-----------------------------------|
+| Temperature value | Numeric with "°" suffix, 1 decimal |
+| Status label | Per insight mapping |
+**Missing Data:**
+Display "–".
+---
+### 8.4 Air Temperature Module
+**Purpose:**
+Displays the current air temperature inside the tower enclosure.
+**Inputs:**
+- `sensors.airTemp` — current internal air temperature in °C
+**Processing Logic:**
+Apply `getSensorInsight('airTemp', sensors.airTemp, stage)`. See Section 5.3.
+**Output / Displayed Information:**
+| Element | Content |
+|--------------------|-----------------------------------|
+| Temperature value | Numeric with "°" suffix, 1 decimal |
+| Status label | Per insight mapping |
+---
+### 8.5 Relative Humidity Module
+**Purpose:**
+Displays the current relative humidity inside the tower enclosure.
+**Inputs:**
+- `sensors.humidity` — current RH in %
+**Processing Logic:**
+Apply `getSensorInsight('humidity', sensors.humidity, stage)` where stage is from
+`savedIrrigation.stage`. See Section 5.4.
+**Output / Displayed Information:**
+| Element | Content |
+|-----------------|---------------------------------------|
+| RH value | Integer with "%" suffix |
+| Status label | Per stage-dependent insight mapping |
+---
+### 8.6 Water Consumption Module
+**Purpose:**
+Estimates the net daily water consumption of the growing system and projects the number of days
+until the reservoir requires refilling.
+**Inputs:**
+- `savedIrrigation.stage` — active growth stage
+- `dev.tankLiters` — current reservoir fill in liters
+- Plant count (derived from `savedPlants`)
+- `GROWTH_STAGE_CONSUMPTION_RANGES` — ml/day per plant per stage
+**Processing Logic:**
+The net daily consumption estimate is based on observed plant water uptake (ΔW) per growth stage:
+| Growth Stage | Consumption Range (ml/day per plant) | Center Value |
+|---------------|---------------------------------------|--------------|
+| Germination | 1 – 3 | 2.0 |
+| Seedling | 6 – 8 | 7.0 |
+| Vegetative | 10 – 14 | 12.0 |
+| Mature | 14 – 18 | 16.0 |
+**Net daily consumption formula:**
+```
+netDailyL = (centerValue × plantCount) / 1000 (L/day)
+```
+If `irrigationSaved = false` or stage is undefined: `netDailyL = 0.015 L/day` (fallback default).
+**Days remaining:**
+```
+daysRemaining = tankLiters / netDailyL
+```
+**Output:**
+| Element | Content |
+|------------------------|-----------------------------------------------------|
+| Estimated daily use | mL/day (total across all plants) |
+| Days remaining | Integer or decimal, used for refill forecast display |
+**Operational States:**
+This module does not have standalone operational states. Its output feeds the Refill Forecast display
+in the Water Tank Module and the Alert Engine.
+---
+### 8.7 Water Tank Module
+**Purpose:**
+Displays the refill forecast based on the water consumption estimate and the current reservoir level.
+**Inputs:**
+- `dev.tankLiters` — reservoir fill in liters
+- `netDailyL` — from Water Consumption Module
+- `CONFIG.tank.criticalPct` = 5 %
+- `CONFIG.tank.soonDays` = 3 days
+**Processing Logic (getRefillForecast):**
+```
+remaining = clamp(tankLiters, 0, 6.5)
+lvl = round(remaining / 6.5 × 100)
+days = remaining / netDailyL
+```
+Decision table:
+| Condition | Forecast Class | Display Text |
+|------------------------|----------------|----------------------------|
+| Irrigation not configured | pending | "No irrigation data" |
+| netDailyL ≤ 0 | pending | "Refill forecast unavailable" |
+| lvl ≤ 5 | critical | "Low reservoir" |
+| days < 1 | critical | "Refill today" |
+| days ≤ 3 | soon | "Refill in ~N days" |
+| days > 3 | ok | "Refill in ~N days" |
+**Output / Displayed Information:**
+The forecast text is displayed as a label above the CWBE reservoir block on the Home screen.
+**Operational States:**
+| Forecast Class | UI Color Indicator |
+|----------------|--------------------|
+| ok | Green |
+| soon | Amber |
+| critical | Red |
+| pending | Neutral/grey |
+---
+### 8.8 Pump Module
+**Purpose:**
+Displays the current pump operational state and allows the operator to manually start or stop the
+pump.
+**Inputs:**
+- `sensors.pumpActive` — boolean; true when pump is running
+**Processing Logic:**
+The pump state is read directly from the telemetry snapshot. Manual toggle inverts the current state
+and sends a hardware command.
+**Output / Displayed Information:**
+| State | Icon Color | Status Label |
+|--------------|------------|---------------------------|
+| pumpActive=true | Green | "Running · manual" |
+| pumpActive=false | Grey | "Idle · on schedule" |
+**User Actions:**
+Toggle switch on pump card. Toggle chip in CWBE hero. Both actions call `togglePump()` which
+inverts `sensors.pumpActive` and fires the hardware command hook.
+**Operational States:**
+| State | Condition |
+|----------|------------------------|
+| Running | sensors.pumpActive = true |
+| Idle | sensors.pumpActive = false |
+---
+### 8.9 LED Module
+**Purpose:**
+Displays the active LED grow light schedule, allows configuration of presets and custom schedules,
+and displays the current operational status.
+**Inputs:**
+- `savedLed.on` — LED on time (HH:MM format)
+- `savedLed.off` — LED off time (HH:MM format)
+- `savedLed.intensity` — brightness in percent (0–100)
+- `savedLed.preset` — one of: 'seedling' | 'standard' | 'bloom' | 'custom' | 'off'
+- System clock (current time)
+**LED Presets:**
+| Preset Name | ON Time | OFF Time | Intensity |
+|-------------|---------|----------|-----------|
+| Seedling | 06:00 | 18:00 | 40 % |
+| Standard | 06:00 | 22:00 | 80 % |
+| Bloom | 05:00 | 23:00 | 100 % |
+| Off | 00:00 | 00:00 | 0 % |
+| Custom | User-defined | User-defined | User-defined |
+**LED Status Computation (getLedStatus):**
+```
+if intensity === 0 OR preset === 'off' → status = 'off'
+nowMins = currentHour × 60 + currentMinute
+onMins = onHour × 60 + onMinute
+offMins = offHour × 60 + offMinute
+if offMins ≤ onMins → status = 'scheduled' (24-hour cycle or invalid)
+if nowMins ≥ onMins AND nowMins < offMins → status = 'active'
+else → status = 'scheduled'
+```
+**LED Status Display:**
+| Status | Badge Text | Dot Behavior |
+|------------|-------------|------------------|
+| active | Active | Animated pulse |
+| scheduled | Scheduled | Static amber |
+| off | Off | Static grey |
+**Output / Displayed Information (summary view):**
+| Element | Content |
+|-----------------|-----------------------------------------------|
+| Status badge | Active / Scheduled / Off |
+| Preset badge | Preset name (Seedling / Standard / Bloom / Custom / Off) |
+| ON time | HH:MM |
+| OFF time | HH:MM |
+| Daily hours | Calculated: offMins − onMins (in hours) |
+| Intensity | Percentage (e.g., 80%) |
+**Daily hours formula:**
+```
+hours = max(0, (offMins − onMins) / 60)
+```
+**User Actions:**
+"Edit LED" button opens the editor. Editor contains:
+- Preset selector (Seedling / Standard / Bloom / Custom / Off)
+- ON time input (HH:MM)
+- OFF time input (HH:MM)
+- Intensity slider (0–100%)
+- Cancel and Save buttons
+Selecting a preset auto-fills ON time, OFF time, and intensity. Manually adjusting any value changes
+preset to 'custom'. Save commits values to `savedLed`. Cancel restores to last saved values.
+**Irrigation Alignment Check:**
+When the LED schedule and irrigation window are both configured, the system checks alignment
+(see Section 8.13 and the LED alignment logic in Section 10).
+---
+### 8.10 Photoperiod Module
+**Purpose:**
+Tracks and displays the daily photoperiod duration (hours of LED-on time per day).
+**Inputs:**
+- `savedLed.on`, `savedLed.off`, `savedLed.intensity`, `savedLed.preset`
+**Processing Logic:**
+```
+if intensity === 0 OR preset === 'off': photoperiodHours = 0
+else: photoperiodHours = max(0, (offMins − onMins) / 60)
+```
+Note: Overnight schedules (offMins ≤ onMins) are treated as "scheduled" status. The daily hours
+calculation in V1 does not compute wrap-around overnight hours. Overnight cycles are not typical in
+GL Towers operation.
+**Output:**
+| Element | Value |
+|--------------------|------------------------------------------|
+| Daily on-hours | e.g., "16h" or "0h" |
+Displayed as a statistic inside the LED summary card.
+---
+### 8.11 Alert Module
+**Purpose:**
+Displays the current active alerts. Accessible via the bell icon in the status bar. Alerts are categorized
+by severity and grouped by recency.
+**Inputs:**
+`appState.notifications` — global alert array.
+**Displayed Information:**
+Each alert entry shows:
+- Alert title
+- Alert message
+- Severity indicator (color stripe: red = critical, amber = warning, blue = info)
+- Device name (if multi-device environment)
+- Timestamp (relative, e.g., "2 min ago")
+- Read/unread state (opacity reduced for read items)
+**Alert Count Badge:**
+The bell icon displays a badge with the count of unread alerts (red badge, max display typically 9+).
+**User Actions:**
+- Tap alert entry: marks as read
+- "Clear" button: removes all alerts from the log
+**Operational States:**
+| State | Condition |
+|--------------|-----------------------------------|
+| No alerts | Notification list is empty |
+| Active alerts| One or more unread entries exist |
+---
+### 8.12 Recommendation / Agronomist Module
+**Purpose:**
+Provides the operator with rule-based diagnostic analysis of the current system state. Displays the
+health status, health score, trend analysis, and actionable recommendations derived from the
+Agronomist Rule Engine.
+**Inputs:**
+- `dev.sensors` — current snapshot
+- `dev.telemetryHistory.samples` — rolling sample array
+- `dev.savedIrrigation.stage` — active growth stage
+- `dev.savedPlants` — plant configuration
+- `dev.tankLiters` — reservoir level
+**Processing Logic:**
+The Agronomist module calls `getAgronomistReport(dev)` which returns a complete analytical
+report. This function performs:
+1. **Confidence computation** — assess reliability of the analysis based on history depth.
+2. **History context** — compute trends for pH, waterTemp, airTemp, humidity, cwbeLevel.
+3. **Plant profile resolution** — resolve the dominant plant's optimal parameter ranges.
+4. **Rule evaluation** — evaluate all AGRONOMIST_RULES against current device state.
+5. **Health score and status** — from fired rules (Section 6.3).
+6. **Refill forecast** — from getRefillForecast() (Section 8.7).
+7. **Plant scope** — multi-plant compatibility analysis.
+8. **Telemetry offline detection** — if last update > 300,000 ms ago.
+**Confidence Levels:**
+| Coverage (hours of history) | Confidence Score | Label |
+|-----------------------------|------------------|------------------|
+| < 3 samples total | 0.00 | None (snapshot only) |
+| < 1 hour | 0.30 | Live |
+| 1 – < 6 hours | 0.55 | Partial history |
+| 6 – < 24 hours | 0.80 | Limited history |
+| ≥ 24 hours | 1.00 | Extended history |
+**Trend Computation:**
+Trends are computed over the last 10 samples (trendWindow). A minimum of 3 samples is required.
+The last 10 samples are split in half; the mean of the second half is compared to the mean of the first
+half. If the difference exceeds the threshold, a trend direction is reported.
+| Parameter | Trend Threshold (delta to trigger) |
+|------------|------------------------------------|
+| pH | 0.20 |
+| Water Temp | 0.50 °C |
+| Air Temp | 0.50 °C |
+| Humidity | 3.00 % |
+| CWBE Level | 3.00 % |
+Trend values: 'rising' | 'falling' | 'stable' | 'unknown'
+**Telemetry Offline Threshold:**
+If `Date.now() - sensors.lastUpdate > 300,000 ms` (5 minutes), telemetry is considered offline. The
+Agronomist panel displays an offline warning and suspends crop analysis.
+**Output / Displayed Information:**
+| Element | Content |
+|----------------------------|------------------------------------------------------|
+| Health status badge | Excellent / Good / Attention / Critical |
+| Health score | Integer 0–100 |
+| Primary message | Summary text from highest-priority fired rule |
+| Recommendations | Action text from highest-priority fired rule |
+| Trend indicators | Rising / Falling / Stable per parameter |
+| Confidence label | History coverage description |
+| Plant profile section | Target pH, water temp, air temp, RH for dominant crop |
+**Telemetry Offline Display:**
+When offline: "Telemetry Unavailable — Crop analysis is temporarily suspended."
+**User Actions (Advanced mode):**
+The Agronomist panel includes a chat interface. The operator can type questions and receive rule-
+based diagnostic responses. This is a text-processing module — it does not affect health evaluation
+or alerts.
+---
+### 8.13 Connectivity Module
+**Purpose:**
+Displays the current connection status of the tower device and signal quality.
+**Inputs:**
+- `dev.metadata.connectionStatus` — 'online' | 'warning' | 'offline'
+- `dev.metadata.signalQuality` — 'excellent' | 'good' | 'fair' | 'poor'
+- `dev.sensors.lastUpdate` — timestamp of last telemetry received
+**Processing Logic (updateDeviceMetadataSync):**
+If `metadata.overrideConnectionStatus` is set, that value is used directly.
+Otherwise:
+```
+age = Date.now() - sensors.lastUpdate
+staleThreshold = 120,000 ms (2 minutes)
+if age > staleThreshold × 2 (240 s): connectionStatus = 'offline'
+if age > staleThreshold (120 s): connectionStatus = 'warning'
+else: connectionStatus = 'online'
+```
+**Output / Displayed Information:**
+| Status | Display |
+|----------|--------------------------------|
+| online | Live dot (green, animated) |
+| warning | Warning indicator (amber) |
+| offline | Offline indicator (red/grey) |
+The live dot is displayed in the page subtitle of the Home screen: "Sensors live · simulation mode" (or
+"live data" in production).
+The connectivity status is also shown in:
+- Device metadata panel (Profile screen → device info)
+- Notification if data becomes stale (> 120 s without update)
+## 9. Alert Engine
+### 9.1 Architecture
+The Alert Engine is separate from the UI rendering pipeline. It maintains a persistent log of state-
+based alerts and discrete event alerts. The UI reads from this log but does not control it.
+### 9.2 Alert Types
+**State-Based Alerts (deduplication key prevents duplicates):**
+These alerts are continuously evaluated on each notification generation run. An alert persists in the
+log as long as its condition remains true. When the condition clears, the alert is removed from the
+active set.
+Alert Key Pattern Trigger Condition Severity
+reservoir-crit-{did} Reservoir level ≤ 5% Critical
+refill-today-{did} Estimated remaining autonomy Critical
+< 1 day
+refill-soon-{did} Estimated remaining autonomy Warning
+≤ 3 days
+telemetry-stale-{did} No telemetry received for more Critical
+than 120,000 ms
+ph-warn-{did} pH diagnostic status = Warning Warning
+ph-low-{did} pH diagnostic status = Critical Critical
+Low
+wt-warn-{did} Water temperature diagnostic Warning
+status = Warning
+at-warn-{did} Air temperature diagnostic Warning
+status = Warning
+at-low-{did} Air temperature diagnostic Critical
+status = Critical Low
+rh-warn-{did} Relative Humidity diagnostic Warning
+status = Warning
+rh-low-{did} Relative Humidity diagnostic Critical
+status = Critical Low
+irr-align-{did} Irrigation schedule is not Warning
+aligned with LED photoperiod
+**Event Alerts (additive, not deduplicated by condition):**
+These are one-time log entries triggered by operator actions:
+| Event Type | Trigger |
+|------------|----------------------------------|
+| refill | Manual tank level adjustment |
+| led_saved | LED configuration saved |
+| irr_saved | Irrigation configuration saved |
+| device_add | New device added |
+### 9.3 Priority Rules
+When multiple alerts are active simultaneously, the bell badge shows the total unread count. The
+alert log displays them in reverse chronological order (newest first), with new alerts inserted at the
+top.
+The notification center groups alerts by "Today" and earlier periods.
+### 9.4 Highest Priority Alert
+For notification summary purposes, the highest-severity active alert determines the overall system
+status communicated to the operator. Priority order: critical > warning > info.
+### 9.5 Throttling
+| Throttle Parameter | Value | Purpose |
+|---------------------------------|--------------|----------------------------------------------|
+| generationThrottleMs | 8,000 ms | Minimum interval between full generation runs |
+| eventThrottleMs | 10,000 ms | Suppress duplicate event alerts within window |
+### 9.6 Storage Limit
+Maximum alerts stored in memory and persisted: **50**. When the limit is reached, the oldest
+alerts are discarded.
+### 9.7 User Notification Behavior
+- New alert: bell badge count increments; badge visible on bell icon.
+- Tapping an alert entry: marks it as read (reduced opacity in list).
+- Tapping "Clear All": removes all alerts from log and resets badge.
+---
+## 10. Recommendation Engine
+### 10.1 Architecture
+Recommendations are generated by the Agronomist Rule Engine as part of `getAgronomistReport()`.
+Each rule in `AGRONOMIST_RULES` carries both an explanation key (describes the condition) and a
+recommendation key (describes the corrective action).
+### 10.2 Rule Library
+The complete rule library with priorities, conditions, and recommendation actions:
+Rule ID Domain Severity Priority Trigger Recommended Action
+Condition
+waterTemp.too_warm Water Critical 10 Water Move the reservoir away
+Temperature temperature from heat sources. Replace
+≥ 27 °C approximately one-third of
+the reservoir water with
+cooler water. If the
+nutrient solution is old or
+roots show signs of stress,
+replace the solution
+completely.
+waterTemp.warm Water Warning 11 25 °C ≤ Monitor temperature
+Temperature Water closely. If it remains above
+temperature 25 °C for an extended
+< 27 °C period, replace
+approximately one-third of
+the reservoir water with
+cooler water.
+waterTemp.slightly_warm Water Info 12 23 °C ≤ Continue monitoring. No
+Temperature Water immediate action required
+temperature unless the temperature
+< 25 °C continues to rise over time.
+ph.too_low pH Critical 20 pH < 5.5 Raise pH immediately using
+pH-Up. Recheck every 15
+minutes until the pH
+stabilizes within the
+optimal range (5.8–6.5).
+ph.too_high pH Critical 21 pH > 7.5 Lower pH immediately
+using pH-Down. Recheck
+every 15 minutes until the
+pH stabilizes within the
+optimal range (5.8–6.5).
+ph.slightly_low pH Info 22 5.5 ≤ pH < Monitor the pH trend. If it
+5.8 continues to decrease,
+make a small pH-Up
+adjustment and recheck
+after 30 minutes.
+ph.high pH Warning 23 7.2 < pH ≤ Add pH-Down in small
+7.5 increments. Wait
+approximately 30 minutes
+before making additional
+corrections.
+ph.slightly_high pH Info 24 6.5 < pH ≤ Continue monitoring. If the
+7.2 pH remains above the
+optimal range for an
+extended period, perform
+a small corrective
+adjustment.
+airTemp.too_hot Air Critical 30 Air Reduce ambient
+Temperature temperature temperature immediately.
+≥ 28 °C Improve ventilation or
+move the tower away from
+heat sources.
+airTemp.warm Air Warning 31 26 °C ≤ Air Improve ventilation and
+Temperature temperature reduce nearby heat
+< 28 °C sources to return to the
+optimal operating range.
+airTemp.slightly_warm Air Info 32 24 °C ≤ Air Continue monitoring.
+Temperature temperature Improve air circulation if
+< 26 °C the condition persists.
+airTemp.cool Air Warning 33 12 °C ≤ Air Increase ambient
+Temperature temperature temperature gradually to
+< 16 °C restore optimal growing
+conditions.
+airTemp.too_cold Air Critical 34 Air Increase temperature
+Temperature temperature immediately by providing
+< 12 °C supplemental heating or
+relocating the tower to a
+warmer environment.
+humidity.too_low Relative Critical 40 RH < Stage Verify reservoir level,
+Humidity Minimum − irrigation schedule and
+10% enclosure sealing.
+Investigate possible air
+leaks.
+humidity.low Relative Warning 41 Stage Inspect enclosure sealing,
+Humidity Minimum − irrigation frequency and
+10% ≤ RH < monitor the water
+Stage consumption trend.
+Minimum
+humidity.high Relative Warning 42 Stage Monitor for condensation,
+Humidity Maximum < stagnant air and unusual
+RH ≤ 99% odours. Ensure adequate
+air circulation.
+humidity.too_high Relative Warning 43 RH > 99% Inspect for persistent
+Humidity condensation, stagnant air
+pockets and abnormal
+odours. Improve
+ventilation if required.
+reservoir.critical Reservoir Critical 50 Refill Refill the reservoir
+Forecast = immediately before the
+Critical next irrigation cycle.
+reservoir.soon Reservoir Warning 51 Refill Schedule a refill to
+Forecast = maintain uninterrupted
+Soon irrigation and system
+stability.
+### 10.3 Priority Rules
+Rules are sorted by ascending priority number before display. The lowest priority number fires first
+and is displayed as the primary observation.
+### 10.4 Suppression Rules
+- Rules with `condition()` returning false are never included in the output.
+- If `dev.sensors.lastUpdate === null`, all rules return false (no telemetry → no evaluation).
+- If telemetry is offline (> 300,000 ms), plant-profile and crop analysis is suspended but sensor-based
+rules remain active until lastUpdate = null.
+### 10.5 Irrigation Alignment Check
+The alignment check is not part of the Agronomist Rule Engine; it is an operational configuration
+warning:
+```
+getLedAlignmentStatus(savedIrrigation, savedLed):
+if LED preset = 'off' OR intensity = 0: return 'ok'
+if offMins ≤ onMins (24h LED): return 'ok'
+if nightBreak = false: return 'warn'
+if winStart ≥ ledOn AND winEnd ≤ ledOff: return 'ok'
+else: return 'warn'
+```
+Warning text when misaligned: "Irrigation window (HH:MM–HH:MM) extends outside LED active
+hours (HH:MM–HH:MM)."
+### 10.6 Substrate-Specific Cycle Warnings
+These are informational warnings generated during irrigation configuration (not Agronomist rules):
+| Substrate | Condition | Warning Text |
+|-------------|-----------------------|--------------------------------------------------------------------------------------------
+|
+| Soil | cyclePause < 30 min | Soil substrates need longer dry periods. A pause of at least 30 min
+prevents waterlogging. |
+| Hydroponic | cyclePause > 60 min | Hydroponic roots need frequent circulation. Pauses over 60
+min may reduce oxygenation. |
+| Clay | cyclePause > 45 min | Clay pebbles drain fast — consider a shorter pause for more
+frequent cycles. |
+---
+## 11. Missing Data Handling
+### 11.1 Pre-Telemetry State
+When a device has been created but no telemetry snapshot has yet been received
+(`sensors.lastUpdate === null`), the following behavior applies:
+| Module | Behavior |
+|-------------------|--------------------------------------------------------|
+| Sensor tiles | Display "–" in value fields |
+| Health Engine | Returns no status; "No Data" indicator displayed |
+| Agronomist Engine | All rules return false; no analysis displayed |
+| Alert Engine | State-based alerts do not fire (rules guard on lastUpdate) |
+| Refill Forecast | Returns 'pending' if irrigation not configured |
+| Trend Analysis | Returns 'unknown' for all parameters |
+| Confidence Score | 0.00 (none) when fewer than 3 samples available |
+### 11.2 Individual Missing Fields
+If a specific sensor field is present in the snapshot but contains an invalid value (NaN, null, out-of-
+range), the associated module displays "–" and the corresponding rules do not fire. Other
+parameters with valid values continue to be evaluated normally.
+---
+## 12. Communication Errors
+### 12.1 Stale Data Detection
+If a telemetry snapshot has not been received within the stale threshold, the following actions occur:
+| Time Without Update | Action |
+|---------------------|------------------------------------------------|
+| > 120,000 ms | Connection status → 'warning' |
+| > 240,000 ms | Connection status → 'offline' |
+| > 120,000 ms | `telemetry-stale` alert generated (critical severity) |
+The displayed sensor values on the Home screen continue to show the last received values (they are
+not cleared). The live indicator pulse is the only real-time signal that data is current.
+### 12.2 Telemetry Offline State for Plant Analysis
+When `Date.now() − sensors.lastUpdate > 300,000 ms`:
+- The Agronomist panel displays: "Telemetry Unavailable — Crop analysis is temporarily suspended."
+- The last time a valid update was received is displayed as "Last update received N minutes ago."
+- Sensor-based rules that already fired prior to the offline event remain in the notification log until
+explicitly cleared or conditions recover.
+### 12.3 Recovery
+When a new telemetry snapshot arrives after a stale or offline period:
+- `lastUpdate` is refreshed.
+- `connectionStatus` is recomputed to 'online'.
+- All health rules are re-evaluated with the new data.
+- The `telemetry-stale` alert is removed from the active alert set automatically on the next
+notification generation run.
+---
+## 13. Refresh Strategy
+### 13.1 Event-Driven Updates
+The dashboard does not poll the screen on a fixed timer. Screen updates occur exclusively when:
+1. A telemetry snapshot is received (from the telemetry provider).
+2. An operator action is performed (navigate, toggle, adjust, save, etc.).
+This design minimizes unnecessary rendering cycles and is appropriate for embedded display
+implementation.
+### 13.2 Telemetry Tick Intervals
+| Speed Setting | Tick Interval | Typical Use |
+|---------------|---------------|---------------------|
+| Slow | 30,000 ms | Power-saving mode |
+| Normal | 15,000 ms | Default operation |
+| Fast | 5,000 ms | Active monitoring |
+### 13.3 Notification Generation Throttle
+Notifications are regenerated at most once every **8,000 ms** regardless of telemetry speed.
+Calling the notification generator more frequently than this threshold is a no-op.
+### 13.4 History Sample Rate
+A new history sample is recorded at most once every **10,000 ms** (regardless of telemetry
+speed). At the default 15,000 ms telemetry interval, one sample is recorded per tick.
+### 13.5 Persistence
+| Action | Storage Write Frequency |
+|-------------------------------|---------------------------|
+| Device state (tank level) | Every 4 telemetry ticks |
+| Telemetry history | Every 4 history samples |
+| Notifications | On every generation run |
+| LED / irrigation configuration | On each save action |
+---
+## 14. Reserved Future Modules
+### 14.1 CWBE — Crop Water Balance Efficiency
+**Status: Excluded from Dashboard V1. Reserved for future integration.**
+CWBE is an advanced scientific module currently under validation. It computes a water-balance
+efficiency metric that correlates plant water uptake with irrigation delivery to detect inefficiencies,
+root health indicators, and early stress signatures.
+The dashboard architecture has been designed to allow future integration of CWBE without
+requiring structural redesign.
+Reserved integration points:
+| Point | Location in Architecture |
+|---------------------------|-----------------------------------------------|
+| CWBE score computation | Health Engine — additional rule group, priority 60–69 |
+| CWBE display panel | Home screen CWBE hero block (currently shows reservoir) |
+| CWBE trend analysis | Telemetry history sample (`cwbeLevel` field already recorded) |
+| CWBE alert rules | Alert Engine — additional dedup keys |
+| CWBE agronomist rules | Rule library, priority 60–69 |
+The current `cwbeLevel` field in the telemetry snapshot is a reservoir percentage placeholder that
+will be replaced or supplemented by the CWBE efficiency score when the module is integrated.
+### 14.2 Correlation Engine
+**Status: Reserved for future implementation.**
+A cross-parameter correlation engine will identify statistical relationships between sensor readings
+(e.g., RH drop correlated with increased consumption). The telemetry history rolling buffer (480
+samples) provides the data substrate for this analysis. No structural changes to the data model are
+required.
+### 14.3 Predictive Analytics
+**Status: Reserved for future implementation.**
+The refill forecast (Section 8.7) is the first implementation of predictive analytics. Future extensions
+will include predicted pH drift, thermal envelope prediction, and growth milestone scheduling based
+on stage data.
+### 14.4 AI Assistant
+**Status: Reserved for future implementation.**
+The Agronomist chat interface in Advanced mode currently uses rule-based pattern matching. The
+interface architecture is designed for replacement with an LLM-backed response engine when
+available. The same chat input and output display infrastructure will be reused.
+### 14.5 Machine Learning
+**Status: Reserved for future implementation.**
+The telemetry history storage format, health scoring architecture, and rule priority system are
+designed to support future ML-based anomaly detection and scoring. All decisions remain
+explainable and overridable by the rule-based system in parallel.
+---
+## 15. Appendix
+### A — CONFIG Reference Table
+Parameter Value Unit Description
+telemetry.simulationTickMs 15,000 ms Default sensor update interval
+Threshold for stale data
+telemetry.staleThresholdMs 120,000 ms
+warning
+Minimum interval between
+notifications.generationThrottleMs 8,000 ms
+notification generation
+Suppress duplicate event alerts
+notifications.eventThrottleMs 10,000 ms within the configured time
+window
+Maximum number of stored
+notifications.maxCount 50 count
+notifications
+Nominal operational reservoir
+tank.capacityL 6.0 L
+capacity
+Maximum physical reservoir
+tank.maxL 6.5 L
+capacity
+tank.pumpFlowLPerMin 0.10 L/min Measured pump flow rate
+Reservoir level at or below this
+tank.criticalPct 5 %
+value triggers a critical alert
+Remaining autonomy threshold
+tank.soonDays 3 days
+for refill-soon notification
+Reserved CWBE critical
+tank.cwbeCritPct 15 % threshold (future
+implementation)
+Reserved CWBE warning
+tank.cwbeWarnPct 30 % threshold (future
+implementation)
+sensors.ph.warnLo 5.5 pH Lower warning threshold
+sensors.ph.lo 5.8 pH Lower optimal operating limit
+sensors.ph.hi 6.5 pH Upper optimal operating limit
+Upper warning threshold
+sensors.ph.warnHi 7.0 pH
+(display logic)
+sensors.waterTemp.warnLo 16 °C Lower warning threshold
+sensors.waterTemp.lo 18 °C Lower optimal operating limit
+sensors.waterTemp.hi 22 °C Upper optimal operating limit
+Upper warning / critical
+sensors.waterTemp.warnHi 27 °C
+threshold
+sensors.airTemp.warnLo 16 °C Lower warning threshold
+sensors.airTemp.lo 18 °C Lower optimal operating limit
+sensors.airTemp.hi 26 °C Upper optimal operating limit
+sensors.airTemp.warnHi 28 °C Upper warning threshold
+Health Score deduction for
+agronomist.penalty.critical 40 pts
+each critical rule
+Health Score deduction for
+agronomist.penalty.warning 15 pts
+each warning rule
+Health Score deduction for
+agronomist.penalty.info 5 pts
+each informational rule
+Minimum score for "Excellent"
+agronomist.healthBand.excellent 85 pts
+system status
+Minimum score for "Good"
+agronomist.healthBand.good 65 pts
+system status
+Minimum score for "Attention"
+agronomist.healthBand.attention 40 pts
+system status
+Minimum telemetry coverage
+agronomist.confidenceBand.live 1 hrs
+for "Live" confidence
+Minimum telemetry coverage
+agronomist.confidenceBand.partial 6 hrs
+for "Partial" confidence
+Minimum telemetry coverage
+agronomist.confidenceBand.limited 24 hrs
+for "Limited" confidence
+Agronomist optimal pH lower
+agronomist.ph.optimalLo 5.8 pH
+limit
+Agronomist optimal pH upper
+agronomist.ph.optimalHi 6.5 pH
+limit
+Highest experimentally
+agronomist.ph.toleratedHi 7.2 pH
+tolerated pH
+agronomist.ph.attentionHi 7.5 pH High pH attention threshold
+agronomist.ph.warnLo 5.5 pH Low pH warning threshold
+Critical low humidity (fallback,
+agronomist.humidity.criticalLo 65 %
+no growth stage)
+Warning low humidity (fallback,
+agronomist.humidity.warnLo 80 %
+no growth stage)
+Near-saturation humidity
+agronomist.humidity.warnHi 99 %
+threshold
+agronomist.airTemp.criticalLo 12 °C Critical low air temperature
+agronomist.airTemp.warnLo 16 °C Warning low air temperature
+agronomist.airTemp.warnHi 26 °C Warning high air temperature
+agronomist.airTemp.criticalHi 28 °C Critical high air temperature
+Minimum variation required to
+agronomist.trendDelta.ph 0.20 pH
+detect a pH trend
+Minimum variation required to
+agronomist.trendDelta.waterTemp 0.50 °C detect a water temperature
+trend
+Minimum variation required to
+agronomist.trendDelta.airTemp 0.50 °C detect an air temperature
+trend
+Minimum variation required to
+agronomist.trendDelta.humidity 3.00 %
+detect a humidity trend
+Reserved minimum variation
+agronomist.trendDelta.cwbeLevel 3.00 %
+for CWBE trend detection
+Number of samples used for
+agronomist.trendWindow 10 samples
+trend calculations
+Minimum number of samples
+agronomist.minSamplesForTrend 3 samples required before trend analysis
+is performed
+### B — Irrigation Matrix
+All values: ON duration (min) / OFF duration (min). Baseline: Italy indoor, March/April, 18 °C, 0.10
+L/min pump.
+Growth Stage Soil Coco Coir Hydroponic Clay Pebbles Rockwool
+Germination 1 min ON / 1 min ON / 1 min ON / 1 min ON / 1 min ON /
+360 min OFF 300 min OFF 240 min OFF 210 min OFF 300 min OFF
+Seedling 1 min ON / 1 min ON / 1 min ON / 1 min ON / 1 min ON /
+180 min OFF 150 min OFF 120 min OFF 105 min OFF 180 min OFF
+Vegetative 1.5 min ON / 1.5 min ON / 1.5 min ON / 1.5 min ON / 1.5 min ON /
+150 min OFF 120 min OFF 90 min OFF 75 min OFF 150 min OFF
+Mature 2 min ON / 90 2 min ON / 75 2 min ON / 60 2 min ON / 50 2 min ON / 90
+min OFF min OFF min OFF min OFF
+### C — Temperature Modifier for Irrigation Off-Cycle
+| Temperature Category | Air Temp Range | OFF-Cycle Multiplier |
+|----------------------|----------------|----------------------|
+| Cool | < 18 °C | × 1.15 |
+| Normal | 18 – 23 °C | × 1.00 |
+| Warm | 23 – 28 °C | × 0.82 |
+| Hot | > 28 °C | × 0.67 |
+### D — Crop Demand Divisor for Irrigation Off-Cycle
+| Crop Category | OFF-Cycle Divisor |
+|---------------|-------------------|
+| Leafy greens | 1.00 |
+| Basil | 0.95 |
+| Parsley | 0.80 |
+| Herbs | 0.73 |
+| Microgreens | 0.68 |
+| Fruiting | 1.20 |
+### E — LED Preset Reference
+| Preset | ON | OFF | Intensity | Photoperiod |
+|----------|-------|-------|-----------|-------------|
+| Seedling | 06:00 | 18:00 | 40 % | 12 h |
+| Standard | 06:00 | 22:00 | 80 % | 16 h |
+| Bloom | 05:00 | 23:00 | 100 % | 18 h |
+| Off | 00:00 | 00:00 | 0 % | 0 h |
+### F — Growth Stage Humidity Targets
+| Stage | RH Min | RH Max | Critical Low (tooLow = min − 10) |
+|-------------|--------|--------|----------------------------------|
+| Germination | 80 % | 96 % | 70 % |
+| Seedling | 70 % | 96 % | 60 % |
+| Vegetative | 60 % | 96 % | 50 % |
+| Mature | 50 % | 96 % | 40 % |
+### G — Growth Stage Net Consumption Ranges
+| Stage | Min (ml/day/plant) | Max (ml/day/plant) | Center (ml/day/plant) |
+|-------------|--------------------|--------------------|----------------------|
+| Germination | 1 | 3 | 2.0 |
+| Seedling | 6 | 8 | 7.0 |
+| Vegetative | 10 | 14 | 12.0 |
+| Mature | 14 | 18 | 16.0 |
+### H — Health Score Penalty Table
+| Severity | Penalty per rule | Notes |
+|----------|-----------------|------------------------------------------|
+| critical | − 40 pts | Two critical rules → score ≤ 20 |
+| warning | − 15 pts | Three warning rules → score 55 |
+| info | − 5 pts | Ten info rules → score 50 |
+### I — CWBE Level Thresholds (V1 — Reservoir Placeholder)
+| Level | Status | cwbeStatus Field |
+|----------------|-----------|------------------|
+| > 30 % | Normal | 'ok' |
+| 15 – 30 % | Low | 'low' |
+| < 15 % | Critical | 'critical' |
+| ≤ 5 % (alert) | Alert | Triggers critical notification |
+### J — Connection Status Thresholds
+| Age of Last Update | connectionStatus | Behavior |
+|-------------------------|------------------|----------------------------------|
+| ≤ 120 s | online | Live dot animated |
+| 120 s – 240 s | warning | Warning indicator shown |
+| > 240 s | offline | Offline indicator shown |
+| > 120 s (alert trigger) | — | telemetry-stale alert generated |
+| > 300 s (agronomist) | — | Plant analysis suspended |

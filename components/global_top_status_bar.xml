@@ -1,8 +1,7 @@
-﻿<component>
+<component>
 	<api>
 		<prop name="bar_title" type="string" />
 		<prop name="bar_time" type="string" />
-		<prop name="bar_wifi" type="string" />
 	</api>
 
 	<view
@@ -28,7 +27,19 @@
 			style_text_font="font_inter_14"
 		/>
 
-		<!-- Time -->
+		<lv_image
+			name="status_wifi_icon"
+			x="386"
+			y="10"
+			width="16"
+			height="16"
+			src="img_top_status_bar_no_wifi"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_image_recolor="#COLOR_TEXT_PRIMARY"
+			style_image_recolor_opa="255"
+		/>
+
 		<lv_label
 			name="status_time"
 			x="410"
@@ -40,21 +51,5 @@
 			style_text_color="#COLOR_TEXT_PRIMARY"
 			style_text_font="font_inter_12"
 		/>
-
-		<!-- WiFi status -->
-		<lv_image
-			name="home_pump_icon"
-			x="415"
-			y="8"
-			width="18"
-			height="18"
-			src="img_top_status_bar_no_wifi"
-			scrollable="false"
-			scrollbar_mode="off"
-			style_image_recolor="#COLOR_TEXT_PRIMARY"
-			style_image_recolor_opa="255"
-		/>
 	</view>
 </component>
-
-

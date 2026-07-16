@@ -1,0 +1,176 @@
+/**
+ * @file irrigation_settings_window_card_gen.c
+ * @brief Template source file for LVGL objects
+ */
+
+/*********************
+ *      INCLUDES
+ *********************/
+
+#include "irrigation_settings_window_card_gen.h"
+#include "../gl_towers_embedded_ui_dashboard.h"
+
+/*********************
+ *      DEFINES
+ *********************/
+
+/**********************
+ *      TYPEDEFS
+ **********************/
+
+/***********************
+ *  STATIC VARIABLES
+ **********************/
+
+/***********************
+ *  STATIC PROTOTYPES
+ **********************/
+
+/**********************
+ *   GLOBAL FUNCTIONS
+ **********************/
+
+lv_obj_t * irrigation_settings_window_card_create(lv_obj_t * parent, const char * start_time_text, const char * end_time_text)
+{
+    LV_TRACE_OBJ_CREATE("begin");
+
+    lv_obj_t * lv_obj_0 = lv_obj_create(parent);
+    lv_obj_set_name_static(lv_obj_0, "irrigation_settings_window_card_#");
+    lv_obj_set_width(lv_obj_0, 452);
+    lv_obj_set_height(lv_obj_0, 115);
+    lv_obj_set_flag(lv_obj_0, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(lv_obj_0, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_bg_color(lv_obj_0, COLOR_CARD_BG, 0);
+    lv_obj_set_style_bg_opa(lv_obj_0, 255, 0);
+    lv_obj_set_style_radius(lv_obj_0, 18, 0);
+    lv_obj_set_style_pad_all(lv_obj_0, 0, 0);
+    lv_obj_set_style_border_width(lv_obj_0, 1, 0);
+    lv_obj_set_style_border_color(lv_obj_0, COLOR_DIVIDER, 0);
+    lv_obj_set_style_shadow_width(lv_obj_0, 8, 0);
+    lv_obj_set_style_shadow_opa(lv_obj_0, 16, 0);
+    lv_obj_set_style_shadow_color(lv_obj_0, COLOR_SHADOW, 0);
+    lv_obj_set_style_shadow_offset_y(lv_obj_0, 3, 0);
+
+    lv_obj_t * irrigation_settings_window_title_label = lv_label_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_title_label, "irrigation_settings_window_title_label");
+    lv_obj_set_x(irrigation_settings_window_title_label, 20);
+    lv_obj_set_y(irrigation_settings_window_title_label, 10);
+    lv_obj_set_width(irrigation_settings_window_title_label, 220);
+    lv_label_set_text(irrigation_settings_window_title_label, "IRRIGATION WINDOW");
+    lv_label_set_long_mode(irrigation_settings_window_title_label, LV_LABEL_LONG_MODE_CLIP);
+    lv_obj_set_style_text_color(irrigation_settings_window_title_label, COLOR_TEXT_SECONDARY, 0);
+    lv_obj_set_style_text_font(irrigation_settings_window_title_label, font_inter_10, 0);
+    lv_obj_set_style_text_letter_space(irrigation_settings_window_title_label, 1, 0);
+
+    lv_obj_t * irrigation_settings_window_start_title_label = lv_label_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_start_title_label, "irrigation_settings_window_start_title_label");
+    lv_obj_set_x(irrigation_settings_window_start_title_label, 20);
+    lv_obj_set_y(irrigation_settings_window_start_title_label, 40);
+    lv_obj_set_width(irrigation_settings_window_start_title_label, 150);
+    lv_label_set_text(irrigation_settings_window_start_title_label, "Start time");
+    lv_label_set_long_mode(irrigation_settings_window_start_title_label, LV_LABEL_LONG_MODE_CLIP);
+    lv_obj_set_style_text_color(irrigation_settings_window_start_title_label, COLOR_TEXT_PRIMARY, 0);
+    lv_obj_set_style_text_font(irrigation_settings_window_start_title_label, font_inter_14, 0);
+
+    lv_obj_t * irrigation_settings_window_start_value_label = lv_label_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_start_value_label, "irrigation_settings_window_start_value_label");
+    lv_obj_set_x(irrigation_settings_window_start_value_label, 300);
+    lv_obj_set_y(irrigation_settings_window_start_value_label, 40);
+    lv_obj_set_width(irrigation_settings_window_start_value_label, 80);
+    lv_label_set_text(irrigation_settings_window_start_value_label, start_time_text);
+    lv_label_set_long_mode(irrigation_settings_window_start_value_label, LV_LABEL_LONG_MODE_CLIP);
+    lv_obj_set_style_text_align(irrigation_settings_window_start_value_label, LV_TEXT_ALIGN_RIGHT, 0);
+    lv_obj_set_style_text_color(irrigation_settings_window_start_value_label, COLOR_PRIMARY_GREEN, 0);
+    lv_obj_set_style_text_font(irrigation_settings_window_start_value_label, font_inter_15, 0);
+
+    lv_obj_t * irrigation_settings_window_start_time_btn = lv_button_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_start_time_btn, "irrigation_settings_window_start_time_btn");
+    lv_obj_set_x(irrigation_settings_window_start_time_btn, 396);
+    lv_obj_set_y(irrigation_settings_window_start_time_btn, 32);
+    lv_obj_set_width(irrigation_settings_window_start_time_btn, 36);
+    lv_obj_set_height(irrigation_settings_window_start_time_btn, 36);
+    lv_obj_set_flag(irrigation_settings_window_start_time_btn, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(irrigation_settings_window_start_time_btn, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_bg_opa(irrigation_settings_window_start_time_btn, 0, 0);
+    lv_obj_set_style_border_width(irrigation_settings_window_start_time_btn, 0, 0);
+    lv_obj_set_style_shadow_width(irrigation_settings_window_start_time_btn, 0, 0);
+    lv_obj_set_style_pad_all(irrigation_settings_window_start_time_btn, 0, 0);
+    lv_obj_t * irrigation_settings_window_start_clock_icon = lv_image_create(irrigation_settings_window_start_time_btn);
+    lv_obj_set_name(irrigation_settings_window_start_clock_icon, "irrigation_settings_window_start_clock_icon");
+    lv_obj_set_x(irrigation_settings_window_start_clock_icon, 10);
+    lv_obj_set_y(irrigation_settings_window_start_clock_icon, 10);
+    lv_obj_set_width(irrigation_settings_window_start_clock_icon, 16);
+    lv_obj_set_height(irrigation_settings_window_start_clock_icon, 16);
+    lv_image_set_src(irrigation_settings_window_start_clock_icon, img_irrigation_clock_16px);
+    lv_obj_set_flag(irrigation_settings_window_start_clock_icon, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(irrigation_settings_window_start_clock_icon, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_image_recolor(irrigation_settings_window_start_clock_icon, COLOR_TEXT_PRIMARY, 0);
+    lv_obj_set_style_image_recolor_opa(irrigation_settings_window_start_clock_icon, 255, 0);
+
+    lv_obj_t * irrigation_settings_window_divider = lv_obj_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_divider, "irrigation_settings_window_divider");
+    lv_obj_set_x(irrigation_settings_window_divider, 20);
+    lv_obj_set_y(irrigation_settings_window_divider, 66);
+    lv_obj_set_width(irrigation_settings_window_divider, 412);
+    lv_obj_set_height(irrigation_settings_window_divider, 1);
+    lv_obj_set_flag(irrigation_settings_window_divider, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(irrigation_settings_window_divider, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_bg_color(irrigation_settings_window_divider, COLOR_DIVIDER, 0);
+    lv_obj_set_style_bg_opa(irrigation_settings_window_divider, 255, 0);
+    lv_obj_set_style_border_width(irrigation_settings_window_divider, 0, 0);
+    lv_obj_set_style_pad_all(irrigation_settings_window_divider, 0, 0);
+
+    lv_obj_t * irrigation_settings_window_end_title_label = lv_label_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_end_title_label, "irrigation_settings_window_end_title_label");
+    lv_obj_set_x(irrigation_settings_window_end_title_label, 20);
+    lv_obj_set_y(irrigation_settings_window_end_title_label, 80);
+    lv_obj_set_width(irrigation_settings_window_end_title_label, 150);
+    lv_label_set_text(irrigation_settings_window_end_title_label, "End time");
+    lv_label_set_long_mode(irrigation_settings_window_end_title_label, LV_LABEL_LONG_MODE_CLIP);
+    lv_obj_set_style_text_color(irrigation_settings_window_end_title_label, COLOR_TEXT_PRIMARY, 0);
+    lv_obj_set_style_text_font(irrigation_settings_window_end_title_label, font_inter_14, 0);
+
+    lv_obj_t * irrigation_settings_window_end_value_label = lv_label_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_end_value_label, "irrigation_settings_window_end_value_label");
+    lv_obj_set_x(irrigation_settings_window_end_value_label, 300);
+    lv_obj_set_y(irrigation_settings_window_end_value_label, 80);
+    lv_obj_set_width(irrigation_settings_window_end_value_label, 80);
+    lv_label_set_text(irrigation_settings_window_end_value_label, end_time_text);
+    lv_label_set_long_mode(irrigation_settings_window_end_value_label, LV_LABEL_LONG_MODE_CLIP);
+    lv_obj_set_style_text_align(irrigation_settings_window_end_value_label, LV_TEXT_ALIGN_RIGHT, 0);
+    lv_obj_set_style_text_color(irrigation_settings_window_end_value_label, COLOR_PRIMARY_GREEN, 0);
+    lv_obj_set_style_text_font(irrigation_settings_window_end_value_label, font_inter_15, 0);
+
+    lv_obj_t * irrigation_settings_window_end_time_btn = lv_button_create(lv_obj_0);
+    lv_obj_set_name(irrigation_settings_window_end_time_btn, "irrigation_settings_window_end_time_btn");
+    lv_obj_set_x(irrigation_settings_window_end_time_btn, 396);
+    lv_obj_set_y(irrigation_settings_window_end_time_btn, 72);
+    lv_obj_set_width(irrigation_settings_window_end_time_btn, 36);
+    lv_obj_set_height(irrigation_settings_window_end_time_btn, 36);
+    lv_obj_set_flag(irrigation_settings_window_end_time_btn, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(irrigation_settings_window_end_time_btn, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_bg_opa(irrigation_settings_window_end_time_btn, 0, 0);
+    lv_obj_set_style_border_width(irrigation_settings_window_end_time_btn, 0, 0);
+    lv_obj_set_style_shadow_width(irrigation_settings_window_end_time_btn, 0, 0);
+    lv_obj_set_style_pad_all(irrigation_settings_window_end_time_btn, 0, 0);
+    lv_obj_t * irrigation_settings_window_end_clock_icon = lv_image_create(irrigation_settings_window_end_time_btn);
+    lv_obj_set_name(irrigation_settings_window_end_clock_icon, "irrigation_settings_window_end_clock_icon");
+    lv_obj_set_x(irrigation_settings_window_end_clock_icon, 10);
+    lv_obj_set_y(irrigation_settings_window_end_clock_icon, 10);
+    lv_obj_set_width(irrigation_settings_window_end_clock_icon, 16);
+    lv_obj_set_height(irrigation_settings_window_end_clock_icon, 16);
+    lv_image_set_src(irrigation_settings_window_end_clock_icon, img_irrigation_clock_16px);
+    lv_obj_set_flag(irrigation_settings_window_end_clock_icon, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(irrigation_settings_window_end_clock_icon, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_image_recolor(irrigation_settings_window_end_clock_icon, COLOR_TEXT_PRIMARY, 0);
+    lv_obj_set_style_image_recolor_opa(irrigation_settings_window_end_clock_icon, 255, 0);
+
+    LV_TRACE_OBJ_CREATE("finished");
+
+    return lv_obj_0;
+}
+
+/**********************
+ *   STATIC FUNCTIONS
+ **********************/
+

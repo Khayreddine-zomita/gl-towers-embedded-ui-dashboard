@@ -1,0 +1,269 @@
+<component>
+	<api>
+		<prop name="time_text" type="string" />
+		<prop name="system_status" type="string" />
+		<prop name="system_status_color" type="color" />
+		<prop name="reservoir_value" type="string" />
+		<prop name="reservoir_unit_x" type="int" />
+		<prop name="reservoir_volume" type="string" />
+		<prop name="pump_status" type="string" />
+		<prop name="pump_status_color" type="color" />
+		<prop name="led_status" type="string" />
+		<prop name="led_status_color" type="color" />
+		<prop name="wifi_status" type="string" />
+		<prop name="wifi_status_color" type="color" />
+		<prop name="hint_text" type="string" />
+	</api>
+
+	<view
+		width="452"
+		height="268"
+		scrollable="false"
+		scrollbar_mode="off"
+		style_bg_opa="0"
+		style_pad_all="0"
+		style_border_width="0"
+		style_radius="0"
+	>
+		<!-- Top identity row -->
+		<lv_image
+			name="screen_saver_logo"
+			x="0"
+			y="2"
+			width="32"
+			height="32"
+			src="img_gl_towers_logo_1"
+			scrollable="false"
+			scrollbar_mode="off"
+		/>
+
+		<lv_label
+			name="screen_saver_brand_label"
+			x="42"
+			y="9"
+			width="190"
+			text="GL TOWERS"
+			long_mode="clip"
+			style_text_color="#COLOR_WHITE"
+			style_text_font="font_inter_14"
+			style_text_letter_space="1"
+		/>
+
+		<lv_label
+			name="screen_saver_time_label"
+			x="354"
+			y="8"
+			width="96"
+			text="$time_text"
+			long_mode="clip"
+			style_text_align="right"
+			style_text_color="#COLOR_WHITE"
+			style_text_font="font_inter_14"
+		/>
+
+		<!-- Main screen saver card -->
+		<lv_obj
+			name="screen_saver_main_card"
+			x="0"
+			y="52"
+			width="452"
+			height="156"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_CARD_BG"
+			style_bg_opa="255"
+			style_radius="22"
+			style_pad_all="0"
+			style_border_width="1"
+			style_border_color="#COLOR_DIVIDER"
+			style_shadow_width="12"
+			style_shadow_opa="24"
+			style_shadow_color="#COLOR_SHADOW"
+			style_shadow_offset_y="5"
+		>
+			<!-- Reservoir block -->
+			<lv_label
+				name="screen_saver_reservoir_title_label"
+				x="28"
+				y="22"
+				width="150"
+				text="RESERVOIR"
+				long_mode="clip"
+				style_text_color="#COLOR_PRIMARY_GREEN"
+				style_text_font="font_inter_12"
+				style_text_letter_space="1"
+			/>
+
+			<lv_label
+				name="screen_saver_reservoir_value_label"
+				x="28"
+				y="50"
+				width="90"
+				text="$reservoir_value"
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_PRIMARY"
+				style_text_font="font_inter_26"
+			/>
+
+			<lv_label
+				name="screen_saver_reservoir_unit_label"
+				x="$reservoir_unit_x"
+				y="63"
+				width="28"
+				text="%"
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_PRIMARY"
+				style_text_font="font_inter_12"
+			/>
+
+			<lv_label
+				name="screen_saver_reservoir_volume_label"
+				x="28"
+				y="96"
+				width="160"
+				text="$reservoir_volume"
+				long_mode="clip"
+				style_text_color="#COLOR_TEXT_SECONDARY"
+				style_text_font="font_inter_12"
+			/>
+
+			<lv_image
+				name="screen_saver_water_icon"
+				x="142"
+				y="55"
+				width="28"
+				height="28"
+				src="img_home_irrigation"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_image_recolor="#COLOR_STATUS_INFO"
+				style_image_recolor_opa="255"
+			/>
+
+			<!-- System health pill -->
+			<lv_obj
+				name="screen_saver_status_pill"
+				x="304"
+				y="18"
+				width="120"
+				height="28"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_LIGHT_GREEN"
+				style_bg_opa="255"
+				style_radius="14"
+				style_border_width="0"
+				style_pad_all="0"
+			>
+				<lv_label
+					name="screen_saver_system_status_label"
+					x="0"
+					y="7"
+					width="120"
+					text="$system_status"
+					long_mode="clip"
+					style_text_align="center"
+					style_text_color="$system_status_color"
+					style_text_font="font_inter_12"
+				/>
+			</lv_obj>
+
+			<!-- Status chips -->
+			<lv_obj
+				name="screen_saver_pump_chip"
+				x="236"
+				y="60"
+				width="188"
+				height="24"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_SOFT_SURFACE"
+				style_bg_opa="255"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+			>
+				<lv_label
+					name="screen_saver_pump_status_label"
+					x="12"
+					y="5"
+					width="164"
+					text="$pump_status"
+					long_mode="clip"
+					style_text_align="center"
+					style_text_color="$pump_status_color"
+					style_text_font="font_inter_11"
+				/>
+			</lv_obj>
+
+			<lv_obj
+				name="screen_saver_led_chip"
+				x="236"
+				y="91"
+				width="188"
+				height="24"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_SOFT_SURFACE"
+				style_bg_opa="255"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+			>
+				<lv_label
+					name="screen_saver_led_status_label"
+					x="12"
+					y="5"
+					width="164"
+					text="$led_status"
+					long_mode="clip"
+					style_text_align="center"
+					style_text_color="$led_status_color"
+					style_text_font="font_inter_11"
+				/>
+			</lv_obj>
+
+			<lv_obj
+				name="screen_saver_wifi_chip"
+				x="236"
+				y="122"
+				width="188"
+				height="24"
+				scrollable="false"
+				scrollbar_mode="off"
+				style_bg_color="#COLOR_SOFT_SURFACE"
+				style_bg_opa="255"
+				style_radius="12"
+				style_border_width="1"
+				style_border_color="#COLOR_DIVIDER"
+				style_pad_all="0"
+			>
+				<lv_label
+					name="screen_saver_wifi_status_label"
+					x="12"
+					y="5"
+					width="164"
+					text="$wifi_status"
+					long_mode="clip"
+					style_text_align="center"
+					style_text_color="$wifi_status_color"
+					style_text_font="font_inter_11"
+				/>
+			</lv_obj>
+		</lv_obj>
+
+		<lv_label
+			name="screen_saver_hint_label"
+			x="0"
+			y="232"
+			width="452"
+			text="$hint_text"
+			long_mode="clip"
+			style_text_align="center"
+			style_text_color="#COLOR_LIGHT_GREEN"
+			style_text_font="font_inter_12"
+		/>
+	</view>
+</component>

@@ -2,6 +2,12 @@ set(LV_EDITOR_PROJECT_SOURCES)
 list(
   APPEND
   LV_EDITOR_PROJECT_SOURCES
+  ${CMAKE_CURRENT_LIST_DIR}/components/device_pairing_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/device_pairing_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/ec_calibration_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/ec_calibration_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/edit_irrigation_settings_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/edit_irrigation_settings_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/global_bottom_nav_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/global_top_status_bar_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/home_reservoir_card_gen.c
@@ -9,14 +15,54 @@ list(
   ${CMAKE_CURRENT_LIST_DIR}/components/home_status_row_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_edit_settings_button_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_overview_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_pump_cycle_bottom_actions_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_pump_cycle_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_pump_cycle_editor_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_pump_cycle_recommended_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_settings_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_settings_growth_stage_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_settings_growth_stage_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_settings_manual_pump_test_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_settings_night_break_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_settings_window_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_substrate_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_substrate_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_summary_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/irrigation_window_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/led_edit_settings_button_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/led_overview_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/led_preset_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/led_schedule_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/led_settings_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/led_settings_intensity_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/led_settings_presets_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/led_settings_schedule_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/load_cell_calibration_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/load_cell_calibration_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/mini_trend_chart_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/ph_calibration_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/ph_calibration_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/screen_saver_status_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/sensors_screen_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_account_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_calibration_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_calibration_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_device_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_device_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_factory_reset_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_factory_reset_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_firmware_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_firmware_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_language_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_language_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_menu_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_subscreen_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_terms_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_terms_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_wlan_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_wlan_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/wifi_setup_bottom_actions_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/wifi_setup_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/fonts/font_inter_8_data.c
   ${CMAKE_CURRENT_LIST_DIR}/fonts/font_inter_9_data.c
   ${CMAKE_CURRENT_LIST_DIR}/fonts/font_inter_10_data.c
@@ -25,40 +71,65 @@ list(
   ${CMAKE_CURRENT_LIST_DIR}/fonts/font_inter_14_data.c
   ${CMAKE_CURRENT_LIST_DIR}/fonts/font_inter_15_data.c
   ${CMAKE_CURRENT_LIST_DIR}/fonts/font_inter_26_data.c
-  ${CMAKE_CURRENT_LIST_DIR}/gl_towers_embedded_ui_gen.c
-  ${CMAKE_CURRENT_LIST_DIR}/gl_towers_embedded_ui.c
+  ${CMAKE_CURRENT_LIST_DIR}/gl_towers_embedded_ui_dashboard_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/gl_towers_embedded_ui_dashboard.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_gl_towers_logo_1_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_home_irrigation_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_home_light_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_home_pump_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_clay_pebbles_substrate_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_clock_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_clock_24px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_coco_coir_substrate_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_drop_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_drop_24px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_drop_silhouette_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_drop_silhouette_24px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_drop_silhouette_substrate_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_germination_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_germination_24px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_growth_stage_germination_16px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_growth_stage_germination_color_16px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_growth_stage_mature_16px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_growth_stage_seedling_16px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_growth_stage_vegetative_16px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_mixed_soil_substrate_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_pump_24px_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_irrigation_rockwool_substrate_16px_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_nav_home_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_nav_irrigation_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_nav_light_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_nav_sensors_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_nav_settings_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_qr_privacy_policy_1_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_qr_terms_conditions_1_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_simple_chevron_icon_1_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_simple_chevron_icon_2_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_top_status_bar_no_wifi_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_top_status_bar_wifi_data.c
-  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_alerts_gen.c
-  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_calibration_gen.c
-  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_diagnostics_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_boot_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_device_pairing_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_ec_calibration_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_edit_irrigation_settings_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_edit_led_settings_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_home_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_irrigation_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_irrigation_settings_growth_stage_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_irrigation_settings_irrigation_window_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_irrigation_settings_pump_cycle_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_irrigation_settings_substrate_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_led_gen.c
-  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_load_cell_gen.c
-  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_ota_gen.c
-  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_pairing_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_load_cell_calibration_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_ph_calibration_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_saver_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_sensors_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_account_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_calibration_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_device_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_factory_reset_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_firmware_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_gen.c
-  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_wifi_gen.c)
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_language_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_terms_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_settings_wlan_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/screen_wifi_setup_gen.c)
