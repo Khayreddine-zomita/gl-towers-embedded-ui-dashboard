@@ -3,7 +3,7 @@
 #define GL_TOWERS_UI_BINDING_H
 
 #include "../gl_towers_ui_contract.h"
-#include "../gl_towers_embedded_ui_dashboard_gen.h"
+#include "gl_towers_embedded_ui_dashboard_gen.h"
 
 //=============================================================================
 // Function Declarations

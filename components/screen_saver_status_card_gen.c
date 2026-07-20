@@ -51,7 +51,6 @@ lv_obj_t * screen_saver_status_card_create(lv_obj_t * parent, const char * time_
     lv_obj_set_y(screen_saver_logo, 2);
     lv_obj_set_width(screen_saver_logo, 32);
     lv_obj_set_height(screen_saver_logo, 32);
-    lv_image_set_src(screen_saver_logo, img_gl_towers_logo_1);
     lv_obj_set_flag(screen_saver_logo, LV_OBJ_FLAG_SCROLLABLE, false);
     lv_obj_set_scrollbar_mode(screen_saver_logo, LV_SCROLLBAR_MODE_OFF);
 

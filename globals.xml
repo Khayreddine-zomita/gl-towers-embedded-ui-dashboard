@@ -45,10 +45,19 @@
 		<color name="COLOR_ALERT_ORANGE" value="0xB8620A" />
 		<color name="COLOR_MUTED_GRAY" value="0xDDE9E1" />
 		<color name="COLOR_BOTTOM_NAV_BG" value="0xFFFFFF" />
+
+		<!-- Boot Screen Colors -->
+		<color name="COLOR_BOOT_BG" value="0xEEE7DF" />
+		<color name="COLOR_BOOT_SURFACE" value="0xD8CFC2" />
+		<color name="COLOR_BOOT_SURFACE_INNER" value="0xCFC5B8" />
+		<color name="COLOR_BOOT_BORDER" value="0xC4B8AA" />
+		<color name="COLOR_BOOT_BLACK" value="0x050505" />
+		<color name="COLOR_BOOT_GOLD" value="0xC8A25A" />
+		<color name="COLOR_BOOT_CABLE" value="0x26211E" />
 	</consts>
 
 	<!-- ========================================================= -->
-	<!-- Inter Fonts                                                -->
+	<!-- Inter Fonts                                               -->
 	<!-- ========================================================= -->
 	<fonts>
 		<bin
@@ -123,6 +132,16 @@
 
 		<bin
 			as_file="false"
+			name="font_inter_18"
+			src_path="fonts/Inter_18pt-Regular.ttf"
+			size="18"
+			bpp="4"
+			range="0x20-0x7f"
+			symbols="°%"
+		/>
+
+		<bin
+			as_file="false"
 			name="font_inter_26"
 			src_path="fonts/Inter_28pt-Bold.ttf"
 			size="26"
@@ -133,14 +152,14 @@
 	</fonts>
 
 	<!-- ========================================================= -->
-	<!-- Images                                                     -->
+	<!-- Images                                                    -->
 	<!-- ========================================================= -->
 	<images>
 		<!-- GL Towers logo -->
 		<data
 			name="img_gl_towers_logo_1"
 			color_format="argb8888"
-			src_path="images/logo/gl_towers_logo_without_bg_24px.png"
+			src_path="images/logo/gl_towers_without_bg_300-removebg-preview.png"
 		/>
 
 		<!-- Edit irrigation settings screen chevron icons-->

@@ -91,6 +91,20 @@ extern "C" {
 
 #define COLOR_BOTTOM_NAV_BG lv_color_hex(0xFFFFFF)
 
+#define COLOR_BOOT_BG lv_color_hex(0xEEE7DF)
+
+#define COLOR_BOOT_SURFACE lv_color_hex(0xD8CFC2)
+
+#define COLOR_BOOT_SURFACE_INNER lv_color_hex(0xCFC5B8)
+
+#define COLOR_BOOT_BORDER lv_color_hex(0xC4B8AA)
+
+#define COLOR_BOOT_BLACK lv_color_hex(0x050505)
+
+#define COLOR_BOOT_GOLD lv_color_hex(0xC8A25A)
+
+#define COLOR_BOOT_CABLE lv_color_hex(0x26211E)
+
 /**********************
  *      TYPEDEFS
  **********************/
