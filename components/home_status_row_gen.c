@@ -42,9 +42,10 @@ lv_obj_t * home_status_row_create(lv_obj_t * parent, const char * pump_status, c
     lv_obj_set_scrollbar_mode(lv_obj_0, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_bg_color(lv_obj_0, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(lv_obj_0, 255, 0);
-    lv_obj_set_style_radius(lv_obj_0, 14, 0);
     lv_obj_set_style_pad_all(lv_obj_0, 0, 0);
-    lv_obj_set_style_border_width(lv_obj_0, 0, 0);
+    lv_obj_set_style_radius(lv_obj_0, 10, 0);
+    lv_obj_set_style_border_width(lv_obj_0, 2, 0);
+    lv_obj_set_style_border_color(lv_obj_0, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(lv_obj_0, 8, 0);
     lv_obj_set_style_shadow_opa(lv_obj_0, 18, 0);
     lv_obj_set_style_shadow_color(lv_obj_0, COLOR_SHADOW, 0);

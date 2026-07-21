@@ -55,7 +55,7 @@ lv_obj_t * led_settings_bottom_actions_create(lv_obj_t * parent, const char * ca
     lv_obj_set_style_bg_color(led_settings_cancel_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(led_settings_cancel_btn, 255, 0);
     lv_obj_set_style_radius(led_settings_cancel_btn, 10, 0);
-    lv_obj_set_style_border_width(led_settings_cancel_btn, 1, 0);
+    lv_obj_set_style_border_width(led_settings_cancel_btn, 2, 0);
     lv_obj_set_style_border_color(led_settings_cancel_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_pad_all(led_settings_cancel_btn, 0, 0);
     lv_obj_set_style_shadow_width(led_settings_cancel_btn, 0, 0);

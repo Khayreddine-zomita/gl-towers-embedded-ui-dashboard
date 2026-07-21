@@ -68,7 +68,7 @@ lv_obj_t * settings_device_card_create(lv_obj_t * parent, const char * device_na
     lv_obj_set_style_bg_opa(settings_device_info_card, 255, 0);
     lv_obj_set_style_radius(settings_device_info_card, 16, 0);
     lv_obj_set_style_pad_all(settings_device_info_card, 0, 0);
-    lv_obj_set_style_border_width(settings_device_info_card, 1, 0);
+    lv_obj_set_style_border_width(settings_device_info_card, 2, 0);
     lv_obj_set_style_border_color(settings_device_info_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(settings_device_info_card, 8, 0);
     lv_obj_set_style_shadow_opa(settings_device_info_card, 14, 0);
@@ -209,7 +209,7 @@ lv_obj_t * settings_device_card_create(lv_obj_t * parent, const char * device_na
     lv_obj_set_style_bg_opa(settings_device_display_card, 255, 0);
     lv_obj_set_style_radius(settings_device_display_card, 16, 0);
     lv_obj_set_style_pad_all(settings_device_display_card, 0, 0);
-    lv_obj_set_style_border_width(settings_device_display_card, 1, 0);
+    lv_obj_set_style_border_width(settings_device_display_card, 2, 0);
     lv_obj_set_style_border_color(settings_device_display_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(settings_device_display_card, 8, 0);
     lv_obj_set_style_shadow_opa(settings_device_display_card, 14, 0);

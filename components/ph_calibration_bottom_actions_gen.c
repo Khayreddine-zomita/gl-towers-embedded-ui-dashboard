@@ -56,7 +56,7 @@ lv_obj_t * ph_calibration_bottom_actions_create(lv_obj_t * parent, const char * 
     lv_obj_set_style_bg_color(ph_calibration_cancel_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(ph_calibration_cancel_btn, 255, 0);
     lv_obj_set_style_radius(ph_calibration_cancel_btn, 10, 0);
-    lv_obj_set_style_border_width(ph_calibration_cancel_btn, 1, 0);
+    lv_obj_set_style_border_width(ph_calibration_cancel_btn, 2, 0);
     lv_obj_set_style_border_color(ph_calibration_cancel_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(ph_calibration_cancel_btn, 0, 0);
     lv_obj_set_style_pad_all(ph_calibration_cancel_btn, 0, 0);

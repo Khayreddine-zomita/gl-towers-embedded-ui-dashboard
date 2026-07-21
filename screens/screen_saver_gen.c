@@ -54,9 +54,37 @@ lv_obj_t * screen_saver_create(void)
     lv_obj_set_style_border_width(lv_obj_0, 0, 0);
     lv_obj_set_style_radius(lv_obj_0, 0, 0);
 
-    lv_obj_t * screen_saver_status_card_0 = screen_saver_status_card_create(lv_obj_0, "13:20", "Healthy", COLOR_PRIMARY_GREEN, "92", 88, "6.0 L / 6.5 L", "Pump ON", COLOR_PRIMARY_GREEN, "LED ON", COLOR_ALERT_ORANGE, "WiFi OK", COLOR_STATUS_INFO, "Tap anywhere to wake");
-    lv_obj_set_x(screen_saver_status_card_0, 14);
-    lv_obj_set_y(screen_saver_status_card_0, 26);
+    lv_obj_t * screen_saver_bg_glow_1 = lv_obj_create(lv_obj_0);
+    lv_obj_set_name(screen_saver_bg_glow_1, "screen_saver_bg_glow_1");
+    lv_obj_set_x(screen_saver_bg_glow_1, -54);
+    lv_obj_set_y(screen_saver_bg_glow_1, -44);
+    lv_obj_set_width(screen_saver_bg_glow_1, 160);
+    lv_obj_set_height(screen_saver_bg_glow_1, 160);
+    lv_obj_set_flag(screen_saver_bg_glow_1, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(screen_saver_bg_glow_1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_bg_color(screen_saver_bg_glow_1, COLOR_PRIMARY_GREEN, 0);
+    lv_obj_set_style_bg_opa(screen_saver_bg_glow_1, 38, 0);
+    lv_obj_set_style_radius(screen_saver_bg_glow_1, 80, 0);
+    lv_obj_set_style_border_width(screen_saver_bg_glow_1, 0, 0);
+    lv_obj_set_style_pad_all(screen_saver_bg_glow_1, 0, 0);
+
+    lv_obj_t * screen_saver_bg_glow_2 = lv_obj_create(lv_obj_0);
+    lv_obj_set_name(screen_saver_bg_glow_2, "screen_saver_bg_glow_2");
+    lv_obj_set_x(screen_saver_bg_glow_2, 360);
+    lv_obj_set_y(screen_saver_bg_glow_2, 210);
+    lv_obj_set_width(screen_saver_bg_glow_2, 150);
+    lv_obj_set_height(screen_saver_bg_glow_2, 150);
+    lv_obj_set_flag(screen_saver_bg_glow_2, LV_OBJ_FLAG_SCROLLABLE, false);
+    lv_obj_set_scrollbar_mode(screen_saver_bg_glow_2, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_bg_color(screen_saver_bg_glow_2, COLOR_GL_GREEN, 0);
+    lv_obj_set_style_bg_opa(screen_saver_bg_glow_2, 30, 0);
+    lv_obj_set_style_radius(screen_saver_bg_glow_2, 75, 0);
+    lv_obj_set_style_border_width(screen_saver_bg_glow_2, 0, 0);
+    lv_obj_set_style_pad_all(screen_saver_bg_glow_2, 0, 0);
+
+    lv_obj_t * screen_saver_status_card_0 = screen_saver_status_card_create(lv_obj_0, "13:20", "Healthy", COLOR_PRIMARY_GREEN, "92", 75, "6.0 L / 6.5 L", "Pump ON", COLOR_PRIMARY_GREEN, "LED ON", COLOR_ALERT_ORANGE, "WiFi OK", COLOR_STATUS_INFO, "Tap anywhere to wake");
+    lv_obj_set_x(screen_saver_status_card_0, 0);
+    lv_obj_set_y(screen_saver_status_card_0, 0);
 
     lv_obj_t * screen_saver_wake_btn = lv_button_create(lv_obj_0);
     lv_obj_set_name(screen_saver_wake_btn, "screen_saver_wake_btn");

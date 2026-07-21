@@ -37,7 +37,7 @@ extern "C" {
  * GLOBAL PROTOTYPES
  **********************/
 
-lv_obj_t * global_bottom_nav_create(lv_obj_t * parent, lv_color_t nav_home_text_color, lv_color_t nav_sensors_text_color, lv_color_t nav_irrigation_text_color, lv_color_t nav_led_text_color, lv_color_t nav_settings_text_color);
+lv_obj_t * global_bottom_nav_create(lv_obj_t * parent, lv_color_t nav_home_text_color, lv_color_t nav_sensors_text_color, lv_color_t nav_irrigation_text_color, lv_color_t nav_led_text_color, lv_color_t nav_settings_text_color, lv_color_t nav_home_bg_color, lv_color_t nav_sensors_bg_color, lv_color_t nav_irrigation_bg_color, lv_color_t nav_led_bg_color, lv_color_t nav_settings_bg_color, int32_t nav_home_bg_opa, int32_t nav_sensors_bg_opa, int32_t nav_irrigation_bg_opa, int32_t nav_led_bg_opa, int32_t nav_settings_bg_opa);
 
 /**********************
  *      MACROS

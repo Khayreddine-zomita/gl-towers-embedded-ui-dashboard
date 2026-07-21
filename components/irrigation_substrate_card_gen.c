@@ -67,7 +67,7 @@ lv_obj_t * irrigation_substrate_card_create(lv_obj_t * parent)
     lv_obj_set_style_bg_opa(irrigation_substrate_card, 255, 0);
     lv_obj_set_style_radius(irrigation_substrate_card, 18, 0);
     lv_obj_set_style_pad_all(irrigation_substrate_card, 0, 0);
-    lv_obj_set_style_border_width(irrigation_substrate_card, 1, 0);
+    lv_obj_set_style_border_width(irrigation_substrate_card, 2, 0);
     lv_obj_set_style_border_color(irrigation_substrate_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(irrigation_substrate_card, 8, 0);
     lv_obj_set_style_shadow_opa(irrigation_substrate_card, 16, 0);

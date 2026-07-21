@@ -44,7 +44,7 @@ lv_obj_t * irrigation_settings_manual_pump_test_create(lv_obj_t * parent, const 
     lv_obj_set_style_bg_opa(lv_obj_0, 255, 0);
     lv_obj_set_style_radius(lv_obj_0, 12, 0);
     lv_obj_set_style_pad_all(lv_obj_0, 0, 0);
-    lv_obj_set_style_border_width(lv_obj_0, 1, 0);
+    lv_obj_set_style_border_width(lv_obj_0, 2, 0);
     lv_obj_set_style_border_color(lv_obj_0, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(lv_obj_0, 8, 0);
     lv_obj_set_style_shadow_opa(lv_obj_0, 16, 0);

@@ -79,7 +79,7 @@ lv_obj_t * settings_language_card_create(lv_obj_t * parent, const char * current
     lv_obj_set_style_bg_opa(settings_language_card, 255, 0);
     lv_obj_set_style_radius(settings_language_card, 18, 0);
     lv_obj_set_style_pad_all(settings_language_card, 0, 0);
-    lv_obj_set_style_border_width(settings_language_card, 1, 0);
+    lv_obj_set_style_border_width(settings_language_card, 2, 0);
     lv_obj_set_style_border_color(settings_language_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(settings_language_card, 8, 0);
     lv_obj_set_style_shadow_opa(settings_language_card, 16, 0);
@@ -104,7 +104,7 @@ lv_obj_t * settings_language_card_create(lv_obj_t * parent, const char * current
     lv_label_set_long_mode(settings_language_current_value_label, LV_LABEL_LONG_MODE_CLIP);
     lv_obj_set_style_text_align(settings_language_current_value_label, LV_TEXT_ALIGN_RIGHT, 0);
     lv_obj_set_style_text_color(settings_language_current_value_label, COLOR_TEXT_SECONDARY, 0);
-    lv_obj_set_style_text_font(settings_language_current_value_label, font_inter_11, 0);
+    lv_obj_set_style_text_font(settings_language_current_value_label, font_inter_12, 0);
 
     lv_obj_t * settings_language_divider_1 = lv_obj_create(settings_language_card);
     lv_obj_set_name(settings_language_divider_1, "settings_language_divider_1");
@@ -135,7 +135,7 @@ lv_obj_t * settings_language_card_create(lv_obj_t * parent, const char * current
     lv_obj_set_y(settings_language_dropdown, 48);
     lv_obj_set_width(settings_language_dropdown, 152);
     lv_obj_set_height(settings_language_dropdown, 30);
-    lv_dropdown_set_options(settings_language_dropdown, "English\nItaliano\nFrançais");
+    lv_dropdown_set_options(settings_language_dropdown, "English\nItaliano\nFrancais");
     lv_dropdown_set_selected(settings_language_dropdown, 0);
     lv_dropdown_set_symbol(settings_language_dropdown, img_simple_chevron_icon_1);
     lv_obj_set_flag(settings_language_dropdown, LV_OBJ_FLAG_SCROLLABLE, false);
@@ -194,7 +194,7 @@ lv_obj_t * settings_language_card_create(lv_obj_t * parent, const char * current
     lv_label_set_long_mode(settings_language_apply_value_label, LV_LABEL_LONG_MODE_CLIP);
     lv_obj_set_style_text_align(settings_language_apply_value_label, LV_TEXT_ALIGN_RIGHT, 0);
     lv_obj_set_style_text_color(settings_language_apply_value_label, COLOR_TEXT_SECONDARY, 0);
-    lv_obj_set_style_text_font(settings_language_apply_value_label, font_inter_11, 0);
+    lv_obj_set_style_text_font(settings_language_apply_value_label, font_inter_12, 0);
 
     lv_obj_t * settings_language_note_card = lv_obj_create(lv_obj_0);
     lv_obj_set_name(settings_language_note_card, "settings_language_note_card");
@@ -206,9 +206,9 @@ lv_obj_t * settings_language_card_create(lv_obj_t * parent, const char * current
     lv_obj_set_scrollbar_mode(settings_language_note_card, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_bg_color(settings_language_note_card, COLOR_SOFT_SURFACE, 0);
     lv_obj_set_style_bg_opa(settings_language_note_card, 255, 0);
-    lv_obj_set_style_radius(settings_language_note_card, 14, 0);
+    lv_obj_set_style_radius(settings_language_note_card, 10, 0);
     lv_obj_set_style_pad_all(settings_language_note_card, 0, 0);
-    lv_obj_set_style_border_width(settings_language_note_card, 1, 0);
+    lv_obj_set_style_border_width(settings_language_note_card, 2, 0);
     lv_obj_set_style_border_color(settings_language_note_card, COLOR_DIVIDER, 0);
     lv_obj_t * settings_language_note_label = lv_label_create(settings_language_note_card);
     lv_obj_set_name(settings_language_note_label, "settings_language_note_label");
@@ -219,7 +219,7 @@ lv_obj_t * settings_language_card_create(lv_obj_t * parent, const char * current
     lv_label_set_text(settings_language_note_label, "Language changes affect the local display interface.");
     lv_label_set_long_mode(settings_language_note_label, LV_LABEL_LONG_MODE_CLIP);
     lv_obj_set_style_text_color(settings_language_note_label, COLOR_TEXT_SECONDARY, 0);
-    lv_obj_set_style_text_font(settings_language_note_label, font_inter_10, 0);
+    lv_obj_set_style_text_font(settings_language_note_label, font_inter_12, 0);
 
     LV_TRACE_OBJ_CREATE("finished");
 

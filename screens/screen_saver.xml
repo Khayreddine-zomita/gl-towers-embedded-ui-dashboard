@@ -10,14 +10,45 @@
 		style_border_width="0"
 		style_radius="0"
 	>
+		<!-- Ambient background glow -->
+		<lv_obj
+			name="screen_saver_bg_glow_1"
+			x="-54"
+			y="-44"
+			width="160"
+			height="160"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_PRIMARY_GREEN"
+			style_bg_opa="38"
+			style_radius="80"
+			style_border_width="0"
+			style_pad_all="0"
+		/>
+
+		<lv_obj
+			name="screen_saver_bg_glow_2"
+			x="360"
+			y="210"
+			width="150"
+			height="150"
+			scrollable="false"
+			scrollbar_mode="off"
+			style_bg_color="#COLOR_GL_GREEN"
+			style_bg_opa="30"
+			style_radius="75"
+			style_border_width="0"
+			style_pad_all="0"
+		/>
+
 		<screen_saver_status_card
-			x="14"
-			y="26"
+			x="0"
+			y="0"
 			time_text="13:20"
 			system_status="Healthy"
 			system_status_color="#COLOR_PRIMARY_GREEN"
 			reservoir_value="92"
-			reservoir_unit_x="88"
+			reservoir_unit_x="75"
 			reservoir_volume="6.0 L / 6.5 L"
 			pump_status="Pump ON"
 			pump_status_color="#COLOR_PRIMARY_GREEN"

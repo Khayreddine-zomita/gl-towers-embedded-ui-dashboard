@@ -79,7 +79,7 @@ lv_obj_t * load_cell_calibration_card_create(lv_obj_t * parent, const char * ste
     lv_obj_set_style_bg_opa(load_cell_calibration_card, 255, 0);
     lv_obj_set_style_radius(load_cell_calibration_card, 18, 0);
     lv_obj_set_style_pad_all(load_cell_calibration_card, 0, 0);
-    lv_obj_set_style_border_width(load_cell_calibration_card, 1, 0);
+    lv_obj_set_style_border_width(load_cell_calibration_card, 2, 0);
     lv_obj_set_style_border_color(load_cell_calibration_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(load_cell_calibration_card, 8, 0);
     lv_obj_set_style_shadow_opa(load_cell_calibration_card, 16, 0);
@@ -131,7 +131,7 @@ lv_obj_t * load_cell_calibration_card_create(lv_obj_t * parent, const char * ste
     lv_obj_t * load_cell_calibration_stability_label = lv_label_create(load_cell_calibration_stability_pill);
     lv_obj_set_name(load_cell_calibration_stability_label, "load_cell_calibration_stability_label");
     lv_obj_set_x(load_cell_calibration_stability_label, 0);
-    lv_obj_set_y(load_cell_calibration_stability_label, 7);
+    lv_obj_set_y(load_cell_calibration_stability_label, 6);
     lv_obj_set_width(load_cell_calibration_stability_label, 92);
     lv_label_set_text(load_cell_calibration_stability_label, stability_status);
     lv_label_set_long_mode(load_cell_calibration_stability_label, LV_LABEL_LONG_MODE_CLIP);

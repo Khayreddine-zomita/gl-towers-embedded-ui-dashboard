@@ -40,8 +40,8 @@ lv_obj_t * irrigation_edit_settings_button_create(lv_obj_t * parent, const char 
     lv_obj_set_height(lv_obj_0, 36);
     lv_obj_set_flag(lv_obj_0, LV_OBJ_FLAG_SCROLLABLE, false);
     lv_obj_set_scrollbar_mode(lv_obj_0, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_style_bg_color(lv_obj_0, COLOR_CARD_BG, 0);
-    lv_obj_set_style_bg_opa(lv_obj_0, 255, 0);
+    lv_obj_set_style_bg_color(lv_obj_0, COLOR_STATUS_INFO, 0);
+    lv_obj_set_style_bg_opa(lv_obj_0, 25, 0);
     lv_obj_set_style_radius(lv_obj_0, 10, 0);
     lv_obj_set_style_pad_all(lv_obj_0, 0, 0);
     lv_obj_set_style_border_width(lv_obj_0, 0, 0);
@@ -52,10 +52,10 @@ lv_obj_t * irrigation_edit_settings_button_create(lv_obj_t * parent, const char 
 
     lv_obj_t * irrigation_edit_settings_btn = lv_button_create(lv_obj_0);
     lv_obj_set_name(irrigation_edit_settings_btn, "irrigation_edit_settings_btn");
-    lv_obj_set_x(irrigation_edit_settings_btn, 12);
-    lv_obj_set_y(irrigation_edit_settings_btn, 5);
-    lv_obj_set_width(irrigation_edit_settings_btn, 432);
-    lv_obj_set_height(irrigation_edit_settings_btn, 25);
+    lv_obj_set_x(irrigation_edit_settings_btn, 2);
+    lv_obj_set_y(irrigation_edit_settings_btn, 2);
+    lv_obj_set_width(irrigation_edit_settings_btn, 448);
+    lv_obj_set_height(irrigation_edit_settings_btn, 32);
     lv_obj_set_flag(irrigation_edit_settings_btn, LV_OBJ_FLAG_SCROLLABLE, false);
     lv_obj_set_scrollbar_mode(irrigation_edit_settings_btn, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_bg_opa(irrigation_edit_settings_btn, 0, 0);
@@ -67,7 +67,7 @@ lv_obj_t * irrigation_edit_settings_button_create(lv_obj_t * parent, const char 
     lv_obj_t * irrigation_edit_settings_label = lv_label_create(irrigation_edit_settings_btn);
     lv_obj_set_name(irrigation_edit_settings_label, "irrigation_edit_settings_label");
     lv_obj_set_x(irrigation_edit_settings_label, 0);
-    lv_obj_set_y(irrigation_edit_settings_label, 3);
+    lv_obj_set_y(irrigation_edit_settings_label, 8);
     lv_obj_set_width(irrigation_edit_settings_label, 440);
     lv_label_set_text(irrigation_edit_settings_label, button_text);
     lv_label_set_long_mode(irrigation_edit_settings_label, LV_LABEL_LONG_MODE_CLIP);

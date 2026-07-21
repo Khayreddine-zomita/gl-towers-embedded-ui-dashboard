@@ -56,7 +56,7 @@ lv_obj_t * edit_irrigation_settings_bottom_actions_create(lv_obj_t * parent, con
     lv_obj_set_style_bg_color(edit_irrigation_back_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(edit_irrigation_back_btn, 255, 0);
     lv_obj_set_style_radius(edit_irrigation_back_btn, 10, 0);
-    lv_obj_set_style_border_width(edit_irrigation_back_btn, 1, 0);
+    lv_obj_set_style_border_width(edit_irrigation_back_btn, 2, 0);
     lv_obj_set_style_border_color(edit_irrigation_back_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_pad_all(edit_irrigation_back_btn, 0, 0);
     lv_obj_set_style_shadow_width(edit_irrigation_back_btn, 0, 0);

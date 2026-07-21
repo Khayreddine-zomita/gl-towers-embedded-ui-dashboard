@@ -56,6 +56,7 @@ list(
   ${CMAKE_CURRENT_LIST_DIR}/components/settings_language_bottom_actions_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/settings_language_card_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/settings_menu_card_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/components/settings_status_bar_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/settings_subscreen_bottom_actions_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/settings_terms_bottom_actions_gen.c
   ${CMAKE_CURRENT_LIST_DIR}/components/settings_terms_card_gen.c
@@ -104,6 +105,16 @@ list(
   ${CMAKE_CURRENT_LIST_DIR}/images/img_nav_settings_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_qr_privacy_policy_1_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_qr_terms_conditions_1_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_account_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_calibration_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_device_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_factory_reset_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_firmware_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_language_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_last_update_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_system_status_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_terms_of_use_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/images/img_settings_wlan_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_simple_chevron_icon_1_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_simple_chevron_icon_2_data.c
   ${CMAKE_CURRENT_LIST_DIR}/images/img_top_status_bar_no_wifi_data.c

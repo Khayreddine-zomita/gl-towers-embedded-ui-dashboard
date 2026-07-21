@@ -56,7 +56,7 @@ lv_obj_t * irrigation_settings_growth_stage_bottom_actions_create(lv_obj_t * par
     lv_obj_set_style_bg_color(irrigation_growth_stage_back_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(irrigation_growth_stage_back_btn, 255, 0);
     lv_obj_set_style_radius(irrigation_growth_stage_back_btn, 10, 0);
-    lv_obj_set_style_border_width(irrigation_growth_stage_back_btn, 1, 0);
+    lv_obj_set_style_border_width(irrigation_growth_stage_back_btn, 2, 0);
     lv_obj_set_style_border_color(irrigation_growth_stage_back_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_pad_all(irrigation_growth_stage_back_btn, 0, 0);
     lv_obj_set_style_shadow_width(irrigation_growth_stage_back_btn, 0, 0);

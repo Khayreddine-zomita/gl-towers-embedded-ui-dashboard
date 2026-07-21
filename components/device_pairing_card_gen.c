@@ -68,7 +68,7 @@ lv_obj_t * device_pairing_card_create(lv_obj_t * parent, const char * pairing_st
     lv_obj_set_style_bg_opa(device_pairing_card, 255, 0);
     lv_obj_set_style_radius(device_pairing_card, 18, 0);
     lv_obj_set_style_pad_all(device_pairing_card, 0, 0);
-    lv_obj_set_style_border_width(device_pairing_card, 1, 0);
+    lv_obj_set_style_border_width(device_pairing_card, 2, 0);
     lv_obj_set_style_border_color(device_pairing_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(device_pairing_card, 8, 0);
     lv_obj_set_style_shadow_opa(device_pairing_card, 16, 0);
@@ -119,7 +119,7 @@ lv_obj_t * device_pairing_card_create(lv_obj_t * parent, const char * pairing_st
     lv_obj_set_style_bg_color(device_pairing_qr_box, COLOR_SOFT_SURFACE, 0);
     lv_obj_set_style_bg_opa(device_pairing_qr_box, 255, 0);
     lv_obj_set_style_radius(device_pairing_qr_box, 12, 0);
-    lv_obj_set_style_border_width(device_pairing_qr_box, 1, 0);
+    lv_obj_set_style_border_width(device_pairing_qr_box, 2, 0);
     lv_obj_set_style_border_color(device_pairing_qr_box, COLOR_DIVIDER, 0);
     lv_obj_set_style_pad_all(device_pairing_qr_box, 0, 0);
     lv_obj_t * device_pairing_qr_label = lv_label_create(device_pairing_qr_box);
@@ -201,7 +201,7 @@ lv_obj_t * device_pairing_card_create(lv_obj_t * parent, const char * pairing_st
     lv_obj_set_style_bg_color(device_pairing_refresh_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(device_pairing_refresh_btn, 255, 0);
     lv_obj_set_style_radius(device_pairing_refresh_btn, 10, 0);
-    lv_obj_set_style_border_width(device_pairing_refresh_btn, 1, 0);
+    lv_obj_set_style_border_width(device_pairing_refresh_btn, 2, 0);
     lv_obj_set_style_border_color(device_pairing_refresh_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_pad_all(device_pairing_refresh_btn, 0, 0);
     lv_obj_set_style_shadow_width(device_pairing_refresh_btn, 0, 0);

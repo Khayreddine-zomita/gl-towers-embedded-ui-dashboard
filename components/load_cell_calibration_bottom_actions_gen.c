@@ -56,7 +56,7 @@ lv_obj_t * load_cell_calibration_bottom_actions_create(lv_obj_t * parent, const 
     lv_obj_set_style_bg_color(load_cell_calibration_cancel_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(load_cell_calibration_cancel_btn, 255, 0);
     lv_obj_set_style_radius(load_cell_calibration_cancel_btn, 10, 0);
-    lv_obj_set_style_border_width(load_cell_calibration_cancel_btn, 1, 0);
+    lv_obj_set_style_border_width(load_cell_calibration_cancel_btn, 2, 0);
     lv_obj_set_style_border_color(load_cell_calibration_cancel_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(load_cell_calibration_cancel_btn, 0, 0);
     lv_obj_set_style_pad_all(load_cell_calibration_cancel_btn, 0, 0);

@@ -37,7 +37,7 @@ extern "C" {
  * GLOBAL PROTOTYPES
  **********************/
 
-lv_obj_t * sensors_screen_card_create(lv_obj_t * parent, const char * sensor_title, const char * sensor_value, const char * sensor_unit, int32_t sensor_unit_x, const char * sensor_status, const char * sensor_hint, lv_color_t sensor_color, const char * trend_values, int32_t trend_min, int32_t trend_max);
+lv_obj_t * sensors_screen_card_create(lv_obj_t * parent, const char * sensor_title, const char * sensor_value, const char * sensor_unit, int32_t sensor_unit_x, const char * sensor_status, const char * sensor_hint, lv_color_t sensor_color, lv_color_t sensor_status_color, lv_color_t sensor_status_bg_color, const char * trend_values, int32_t trend_min, int32_t trend_max);
 
 /**********************
  *      MACROS

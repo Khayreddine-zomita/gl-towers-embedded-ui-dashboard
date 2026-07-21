@@ -55,7 +55,7 @@ lv_obj_t * irrigation_settings_bottom_actions_create(lv_obj_t * parent, const ch
     lv_obj_set_style_bg_color(irrigation_settings_cancel_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(irrigation_settings_cancel_btn, 255, 0);
     lv_obj_set_style_radius(irrigation_settings_cancel_btn, 10, 0);
-    lv_obj_set_style_border_width(irrigation_settings_cancel_btn, 1, 0);
+    lv_obj_set_style_border_width(irrigation_settings_cancel_btn, 2, 0);
     lv_obj_set_style_border_color(irrigation_settings_cancel_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_pad_all(irrigation_settings_cancel_btn, 0, 0);
     lv_obj_set_style_shadow_width(irrigation_settings_cancel_btn, 0, 0);

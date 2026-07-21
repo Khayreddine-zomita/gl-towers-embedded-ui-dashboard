@@ -79,7 +79,7 @@ lv_obj_t * settings_firmware_card_create(lv_obj_t * parent, const char * current
     lv_obj_set_style_bg_opa(settings_firmware_info_card, 255, 0);
     lv_obj_set_style_radius(settings_firmware_info_card, 18, 0);
     lv_obj_set_style_pad_all(settings_firmware_info_card, 0, 0);
-    lv_obj_set_style_border_width(settings_firmware_info_card, 1, 0);
+    lv_obj_set_style_border_width(settings_firmware_info_card, 2, 0);
     lv_obj_set_style_border_color(settings_firmware_info_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(settings_firmware_info_card, 8, 0);
     lv_obj_set_style_shadow_opa(settings_firmware_info_card, 16, 0);

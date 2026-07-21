@@ -334,24 +334,24 @@
 		<data
 			name="img_settings_terms_of_use"
 			color_format="argb8888"
-			src_path="images/icons/settings_terms of use_16px.png"
+			src_path="images/icons/settings_termsofuse_16px.png"
 		/>
 		<data
 			name="img_settings_factory_reset"
 			color_format="argb8888"
-			src_path="images/icons/settings_factory reset_16px.png"
+			src_path="images/icons/settings_factoryreset_16px.png"
 		/>
 
 		<!-- Settings Status Icons -->
 		<data
 			name="img_settings_system_status"
 			color_format="argb8888"
-			src_path="images/icons/settings_system status_24px.png"
+			src_path="images/icons/settings_systemstatus_24px.png"
 		/>
 		<data
 			name="img_settings_last_update"
 			color_format="argb8888"
-			src_path="images/icons/settings_last update_24px.png"
+			src_path="images/icons/settings_lastupdate_24px.png"
 		/>
 
 		<!-- Bottom Navigation Icons -->

@@ -48,7 +48,7 @@ lv_obj_t * screen_settings_create(void)
     lv_obj_set_height(lv_obj_0, 320);
     lv_obj_set_flag(lv_obj_0, LV_OBJ_FLAG_SCROLLABLE, false);
     lv_obj_set_scrollbar_mode(lv_obj_0, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_style_bg_color(lv_obj_0, COLOR_APP_BG, 0);
+    lv_obj_set_style_bg_color(lv_obj_0, COLOR_WHITE, 0);
     lv_obj_set_style_bg_opa(lv_obj_0, 255, 0);
     lv_obj_set_style_pad_all(lv_obj_0, 0, 0);
     lv_obj_set_style_border_width(lv_obj_0, 0, 0);
@@ -59,10 +59,14 @@ lv_obj_t * screen_settings_create(void)
     lv_obj_set_y(global_top_status_bar_0, 0);
 
     lv_obj_t * settings_menu_card_0 = settings_menu_card_create(lv_obj_0, "Not linked", "Connected", "GL Tower", "3/4 done", "v0.1.0", "English");
-    lv_obj_set_x(settings_menu_card_0, 14);
-    lv_obj_set_y(settings_menu_card_0, 42);
+    lv_obj_set_x(settings_menu_card_0, 8);
+    lv_obj_set_y(settings_menu_card_0, 40);
 
-    lv_obj_t * global_bottom_nav_0 = global_bottom_nav_create(lv_obj_0, COLOR_DARK_FOREST, COLOR_DARK_FOREST, COLOR_DARK_FOREST, COLOR_DARK_FOREST, COLOR_STATUS_HEALTHY);
+    lv_obj_t * settings_status_bar_0 = settings_status_bar_create(lv_obj_0, "All systems operational", "Today, 12:45");
+    lv_obj_set_x(settings_status_bar_0, 8);
+    lv_obj_set_y(settings_status_bar_0, 230);
+
+    lv_obj_t * global_bottom_nav_0 = global_bottom_nav_create(lv_obj_0, COLOR_WHITE, COLOR_WHITE, COLOR_WHITE, COLOR_WHITE, COLOR_WHITE, COLOR_DARK_FOREST, COLOR_DARK_FOREST, COLOR_DARK_FOREST, COLOR_DARK_FOREST, COLOR_PRIMARY_GREEN, 0, 0, 0, 0, 255);
     lv_obj_set_x(global_bottom_nav_0, 0);
     lv_obj_set_y(global_bottom_nav_0, 280);
 

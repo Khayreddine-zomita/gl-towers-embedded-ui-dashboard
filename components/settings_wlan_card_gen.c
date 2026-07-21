@@ -37,7 +37,7 @@ lv_obj_t * settings_wlan_card_create(lv_obj_t * parent, const char * network_nam
     lv_obj_t * lv_obj_0 = lv_obj_create(parent);
     lv_obj_set_name_static(lv_obj_0, "settings_wlan_card_#");
     lv_obj_set_width(lv_obj_0, 452);
-    lv_obj_set_height(lv_obj_0, 206);
+    lv_obj_set_height(lv_obj_0, 215);
     lv_obj_set_flag(lv_obj_0, LV_OBJ_FLAG_SCROLLABLE, false);
     lv_obj_set_scrollbar_mode(lv_obj_0, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_bg_opa(lv_obj_0, 0, 0);
@@ -61,14 +61,14 @@ lv_obj_t * settings_wlan_card_create(lv_obj_t * parent, const char * network_nam
     lv_obj_set_x(settings_wlan_card, 0);
     lv_obj_set_y(settings_wlan_card, 24);
     lv_obj_set_width(settings_wlan_card, 452);
-    lv_obj_set_height(settings_wlan_card, 182);
+    lv_obj_set_height(settings_wlan_card, 190);
     lv_obj_set_flag(settings_wlan_card, LV_OBJ_FLAG_SCROLLABLE, false);
     lv_obj_set_scrollbar_mode(settings_wlan_card, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_bg_color(settings_wlan_card, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(settings_wlan_card, 255, 0);
     lv_obj_set_style_radius(settings_wlan_card, 18, 0);
     lv_obj_set_style_pad_all(settings_wlan_card, 0, 0);
-    lv_obj_set_style_border_width(settings_wlan_card, 1, 0);
+    lv_obj_set_style_border_width(settings_wlan_card, 2, 0);
     lv_obj_set_style_border_color(settings_wlan_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(settings_wlan_card, 8, 0);
     lv_obj_set_style_shadow_opa(settings_wlan_card, 16, 0);

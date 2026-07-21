@@ -176,6 +176,16 @@ extern const void * img_top_status_bar_no_wifi;
 extern const void * img_home_pump;
 extern const void * img_home_irrigation;
 extern const void * img_home_light;
+extern const void * img_settings_account;
+extern const void * img_settings_wlan;
+extern const void * img_settings_device;
+extern const void * img_settings_calibration;
+extern const void * img_settings_firmware;
+extern const void * img_settings_language;
+extern const void * img_settings_terms_of_use;
+extern const void * img_settings_factory_reset;
+extern const void * img_settings_system_status;
+extern const void * img_settings_last_update;
 extern const void * img_nav_home;
 extern const void * img_nav_sensors;
 extern const void * img_nav_irrigation;
@@ -263,6 +273,7 @@ void gl_towers_embedded_ui_dashboard_init_gen(const char * asset_path);
 #include "components/settings_language_bottom_actions_gen.h"
 #include "components/settings_language_card_gen.h"
 #include "components/settings_menu_card_gen.h"
+#include "components/settings_status_bar_gen.h"
 #include "components/settings_subscreen_bottom_actions_gen.h"
 #include "components/settings_terms_bottom_actions_gen.h"
 #include "components/settings_terms_card_gen.h"

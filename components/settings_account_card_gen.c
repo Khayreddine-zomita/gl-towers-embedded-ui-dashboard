@@ -68,7 +68,7 @@ lv_obj_t * settings_account_card_create(lv_obj_t * parent, const char * account_
     lv_obj_set_style_bg_opa(settings_account_card, 255, 0);
     lv_obj_set_style_radius(settings_account_card, 18, 0);
     lv_obj_set_style_pad_all(settings_account_card, 0, 0);
-    lv_obj_set_style_border_width(settings_account_card, 1, 0);
+    lv_obj_set_style_border_width(settings_account_card, 2, 0);
     lv_obj_set_style_border_color(settings_account_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(settings_account_card, 8, 0);
     lv_obj_set_style_shadow_opa(settings_account_card, 16, 0);

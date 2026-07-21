@@ -76,9 +76,9 @@
 			y="5"
 			width="24"
 			height="24"
-			src="img_settings_last_update"
 			scrollable="false"
 			scrollbar_mode="off"
+			src="img_settings_last_update"
 			style_image_recolor="#COLOR_GL_GREEN_DARK"
 			style_image_recolor_opa="255"
 		/>

@@ -68,7 +68,7 @@ lv_obj_t * wifi_setup_card_create(lv_obj_t * parent, const char * selected_netwo
     lv_obj_set_style_bg_opa(wifi_setup_card, 255, 0);
     lv_obj_set_style_radius(wifi_setup_card, 18, 0);
     lv_obj_set_style_pad_all(wifi_setup_card, 0, 0);
-    lv_obj_set_style_border_width(wifi_setup_card, 1, 0);
+    lv_obj_set_style_border_width(wifi_setup_card, 2, 0);
     lv_obj_set_style_border_color(wifi_setup_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(wifi_setup_card, 8, 0);
     lv_obj_set_style_shadow_opa(wifi_setup_card, 16, 0);
@@ -137,7 +137,7 @@ lv_obj_t * wifi_setup_card_create(lv_obj_t * parent, const char * selected_netwo
     lv_obj_t * wifi_setup_scan_label = lv_label_create(wifi_setup_scan_btn);
     lv_obj_set_name(wifi_setup_scan_label, "wifi_setup_scan_label");
     lv_obj_set_x(wifi_setup_scan_label, 0);
-    lv_obj_set_y(wifi_setup_scan_label, 6);
+    lv_obj_set_y(wifi_setup_scan_label, 5);
     lv_obj_set_width(wifi_setup_scan_label, 78);
     lv_label_set_text(wifi_setup_scan_label, "Scan");
     lv_label_set_long_mode(wifi_setup_scan_label, LV_LABEL_LONG_MODE_CLIP);

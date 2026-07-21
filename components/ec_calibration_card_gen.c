@@ -79,7 +79,7 @@ lv_obj_t * ec_calibration_card_create(lv_obj_t * parent, const char * step_text,
     lv_obj_set_style_bg_opa(ec_calibration_card, 255, 0);
     lv_obj_set_style_radius(ec_calibration_card, 18, 0);
     lv_obj_set_style_pad_all(ec_calibration_card, 0, 0);
-    lv_obj_set_style_border_width(ec_calibration_card, 1, 0);
+    lv_obj_set_style_border_width(ec_calibration_card, 2, 0);
     lv_obj_set_style_border_color(ec_calibration_card, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(ec_calibration_card, 8, 0);
     lv_obj_set_style_shadow_opa(ec_calibration_card, 16, 0);
@@ -131,7 +131,7 @@ lv_obj_t * ec_calibration_card_create(lv_obj_t * parent, const char * step_text,
     lv_obj_t * ec_calibration_stability_label = lv_label_create(ec_calibration_stability_pill);
     lv_obj_set_name(ec_calibration_stability_label, "ec_calibration_stability_label");
     lv_obj_set_x(ec_calibration_stability_label, 0);
-    lv_obj_set_y(ec_calibration_stability_label, 7);
+    lv_obj_set_y(ec_calibration_stability_label, 6);
     lv_obj_set_width(ec_calibration_stability_label, 92);
     lv_label_set_text(ec_calibration_stability_label, stability_status);
     lv_label_set_long_mode(ec_calibration_stability_label, LV_LABEL_LONG_MODE_CLIP);

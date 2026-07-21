@@ -48,7 +48,7 @@ lv_obj_t * screen_settings_language_create(void)
     lv_obj_set_height(lv_obj_0, 320);
     lv_obj_set_flag(lv_obj_0, LV_OBJ_FLAG_SCROLLABLE, false);
     lv_obj_set_scrollbar_mode(lv_obj_0, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_style_bg_color(lv_obj_0, COLOR_APP_BG, 0);
+    lv_obj_set_style_bg_color(lv_obj_0, COLOR_WHITE, 0);
     lv_obj_set_style_bg_opa(lv_obj_0, 255, 0);
     lv_obj_set_style_pad_all(lv_obj_0, 0, 0);
     lv_obj_set_style_border_width(lv_obj_0, 0, 0);

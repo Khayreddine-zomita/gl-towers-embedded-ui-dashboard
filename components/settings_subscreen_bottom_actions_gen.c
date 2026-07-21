@@ -56,7 +56,7 @@ lv_obj_t * settings_subscreen_bottom_actions_create(lv_obj_t * parent, const cha
     lv_obj_set_style_bg_color(settings_subscreen_back_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(settings_subscreen_back_btn, 255, 0);
     lv_obj_set_style_radius(settings_subscreen_back_btn, 10, 0);
-    lv_obj_set_style_border_width(settings_subscreen_back_btn, 1, 0);
+    lv_obj_set_style_border_width(settings_subscreen_back_btn, 2, 0);
     lv_obj_set_style_border_color(settings_subscreen_back_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_pad_all(settings_subscreen_back_btn, 0, 0);
     lv_obj_set_style_shadow_width(settings_subscreen_back_btn, 0, 0);

@@ -44,7 +44,8 @@ lv_obj_t * led_preset_card_create(lv_obj_t * parent, const char * intensity_valu
     lv_obj_set_style_bg_opa(lv_obj_0, 255, 0);
     lv_obj_set_style_radius(lv_obj_0, 16, 0);
     lv_obj_set_style_pad_all(lv_obj_0, 0, 0);
-    lv_obj_set_style_border_width(lv_obj_0, 0, 0);
+    lv_obj_set_style_border_width(lv_obj_0, 2, 0);
+    lv_obj_set_style_border_color(lv_obj_0, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(lv_obj_0, 8, 0);
     lv_obj_set_style_shadow_opa(lv_obj_0, 18, 0);
     lv_obj_set_style_shadow_color(lv_obj_0, COLOR_SHADOW, 0);
@@ -67,7 +68,7 @@ lv_obj_t * led_preset_card_create(lv_obj_t * parent, const char * intensity_valu
     lv_obj_set_x(led_preset_title_label, 44);
     lv_obj_set_y(led_preset_title_label, 13);
     lv_obj_set_width(led_preset_title_label, 110);
-    lv_label_set_text(led_preset_title_label, "PRESET");
+    lv_label_set_text(led_preset_title_label, "PRESETS");
     lv_label_set_long_mode(led_preset_title_label, LV_LABEL_LONG_MODE_CLIP);
     lv_obj_set_style_text_color(led_preset_title_label, COLOR_PRIMARY_GREEN, 0);
     lv_obj_set_style_text_font(led_preset_title_label, font_inter_14, 0);

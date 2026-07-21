@@ -56,7 +56,7 @@ lv_obj_t * settings_terms_bottom_actions_create(lv_obj_t * parent, const char * 
     lv_obj_set_style_bg_color(settings_terms_back_btn, COLOR_CARD_BG, 0);
     lv_obj_set_style_bg_opa(settings_terms_back_btn, 255, 0);
     lv_obj_set_style_radius(settings_terms_back_btn, 10, 0);
-    lv_obj_set_style_border_width(settings_terms_back_btn, 1, 0);
+    lv_obj_set_style_border_width(settings_terms_back_btn, 2, 0);
     lv_obj_set_style_border_color(settings_terms_back_btn, COLOR_DIVIDER, 0);
     lv_obj_set_style_shadow_width(settings_terms_back_btn, 0, 0);
     lv_obj_set_style_pad_all(settings_terms_back_btn, 0, 0);
@@ -81,7 +81,7 @@ lv_obj_t * settings_terms_bottom_actions_create(lv_obj_t * parent, const char * 
     lv_obj_set_scrollbar_mode(settings_terms_accept_btn, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_bg_color(settings_terms_accept_btn, COLOR_PRIMARY_GREEN, 0);
     lv_obj_set_style_bg_opa(settings_terms_accept_btn, 255, 0);
-    lv_obj_set_style_radius(settings_terms_accept_btn, 10, 0);
+    lv_obj_set_style_radius(settings_terms_accept_btn, 6, 0);
     lv_obj_set_style_border_width(settings_terms_accept_btn, 0, 0);
     lv_obj_set_style_shadow_width(settings_terms_accept_btn, 0, 0);
     lv_obj_set_style_pad_all(settings_terms_accept_btn, 0, 0);
